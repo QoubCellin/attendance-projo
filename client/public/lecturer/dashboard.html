@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lecturer Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand" href="#">Attendance System</a>
+            <div class="navbar-nav ms-auto">
+                <span class="navbar-text me-3" id="userName"></span>
+                <button class="btn btn-outline-light" id="logoutBtn">Logout</button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5>Create New Session</h5>
+                    </div>
+                    <div class="card-body">
+                        <form id="sessionForm">
+                            <div class="mb-3">
+                                <label for="classSelect" class="form-label">Class</label>
+                                <select class="form-select" id="classSelect" required>
+                                    <!-- Classes will be loaded here -->
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="sessionDate" class="form-label">Date</label>
+                                <input type="date" class="form-control" id="sessionDate" required>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="startTime" class="form-label">Start Time</label>
+                                    <input type="time" class="form-control" id="startTime" required>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="endTime" class="form-label">End Time</label>
+                                    <input type="time" class="form-control" id="endTime" required>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Create Session</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5>Recent Sessions</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Course</th>
+                                        <th>Date</th>
+                                        <th>Time</th>
+                                        <th>Code</th>
+                                        <th>Attendance</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="sessionsTable">
+                                    <!-- Sessions will be loaded here -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Check authentication
+        const token = localStorage.getItem('token');
+        const user = JSON.parse(localStorage.getItem('user'));
+        
+        if (!token || !user || user.role !== 'lecturer') {
+            window.location.href = 'login.html';
+        }
+        
+        document.getElementById('userName').textContent = user.full_name;
+        
+        // Load lecturer's classes
+        async function loadClasses() {
+            try {
+                const response = await fetch('/api/classes', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                const classes = await response.json();
+                const classSelect = document.getElementById('classSelect');
+                
+                classSelect.innerHTML = '';
+                classes.forEach(cls => {
+                    const option = document.createElement('option');
+                    option.value = cls.class_id;
+                    option.textContent = `${cls.course_code} - ${cls.course_name}`;
+                    classSelect.appendChild(option);
+                });
+            } catch (err) {
+                console.error(err);
+                alert('Failed to load classes');
+            }
+        }
+        
+        // Load recent sessions
+        async function loadSessions() {
+            try {
+                const response = await fetch('/api/sessions', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                const sessions = await response.json();
+                const sessionsTable = document.getElementById('sessionsTable');
+                
+                sessionsTable.innerHTML = '';
+                sessions.forEach(session => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${session.course_code}</td>
+                        <td>${new Date(session.session_date).toLocaleDateString()}</td>
+                        <td>${session.start_time} - ${session.end_time}</td>
+                        <td>${session.session_code}</td>
+                        <td><a href="#" class="view-attendance" data-id="${session.session_id}">View</a></td>
+                    `;
+                    sessionsTable.appendChild(row);
+                });
+            } catch (err) {
+                console.error(err);
+                alert('Failed to load sessions');
+            }
+        }
+        
+        // Create new session
+        document.getElementById('sessionForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const classId = document.getElementById('classSelect').value;
+            const sessionDate = document.getElementById('sessionDate').value;
+            const startTime = document.getElementById('startTime').value;
+            const endTime = document.getElementById('endTime').value;
+            
+            try {
+                const response = await fetch('/api/sessions', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ 
+                        class_id: classId, 
+                        session_date: sessionDate, 
+                        start_time: startTime, 
+                        end_time: endTime 
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    alert(`Session created successfully! Session code: ${data.session_code}`);
+                    loadSessions();
+                } else {
+                    alert(data.message || 'Failed to create session');
+                }
+            } catch (err) {
+                console.error(err);
+                alert('An error occurred');
+            }
+        });
+        
+        // Logout
+        document.getElementById('logoutBtn').addEventListener('click', () => {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            window.location.href = 'login.html';
+        });
+        
+        // Initial load
+        loadClasses();
+        loadSessions();
+    </script>
+</body>
+</html>
