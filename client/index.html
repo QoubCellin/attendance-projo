@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Student Attendance</title>
+		<!-- Tailwind CSS CDN -->
+		<script src="https://cdn.tailwindcss.com"></script>
+		<style>
+			/* Fade-in animation for the status card */
+			@keyframes fadeIn {
+				from {
+					opacity: 0;
+					transform: translateY(10px);
+				}
+				to {
+					opacity: 1;
+					transform: translateY(0);
+				}
+			}
+			.fade-in {
+				animation: fadeIn 0.5s ease-in-out;
+			}
+			/* Spinner animation */
+			.spinner {
+				border: 4px solid rgba(0, 0, 0, 0.1);
+				border-left-color: #4caf50;
+				border-radius: 50%;
+				width: 24px;
+				height: 24px;
+				animation: spin 1s linear infinite;
+				display: inline-block;
+			}
+			@keyframes spin {
+				to {
+					transform: rotate(360deg);
+				}
+			}
+		</style>
+	</head>
+	<body
+		class="min-h-screen bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center p-4"
+	>
+		<div
+			class="container max-w-md w-full bg-white rounded-xl shadow-lg p-6"
+		>
+			<h1
+				class="text-2xl font-bold text-gray-800 text-center mb-6 flex items-center justify-center"
+			>
+				<svg
+					class="w-6 h-6 mr-2 text-green-500"
+					fill="none"
+					stroke="currentColor"
+					viewBox="0 0 24 24"
+					xmlns="http://www.w3.org/2000/svg"
+				>
+					<path
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						stroke-width="2"
+						d="M5 13l4 4L19 7"
+					></path>
+				</svg>
+				Mark Your Attendance
+			</h1>
+
+			<!-- Form to mark attendance -->
+			<div id="attendanceForm" class="space-y-4">
+				<div>
+					<label
+						for="classSelect"
+						class="block text-sm font-medium text-gray-700 mb-1"
+						>Select Class</label
+					>
+					<select
+						id="classSelect"
+						class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition"
+					>
+						<option value="">-- Select a Class --</option>
+						<option value="class_1">Math 101 - Section A</option>
+						<option value="class_2">Science 202 - Section B</option>
+						<option value="class_3">History 303 - Section C</option>
+					</select>
+				</div>
+				<div>
+					<label
+						for="dateSelect"
+						class="block text-sm font-medium text-gray-700 mb-1"
+						>Select Date</label
+					>
+					<input
+						type="date"
+						id="dateSelect"
+						class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition"
+						value="2025-04-24"
+					/>
+				</div>
+				<div>
+					<label
+						for="statusSelect"
+						class="block text-sm font-medium text-gray-700 mb-1"
+						>Attendance Status</label
+					>
+					<select
+						id="statusSelect"
+						class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition"
+					>
+						<option value="present">Present</option>
+						<option value="late">Late</option>
+						<option value="excused">Excused</option>
+					</select>
+				</div>
+				<button
+					id="markButton"
+					onclick="markAttendance()"
+					class="w-full bg-green-500 text-white p-3 rounded-lg hover:bg-green-600 transition flex items-center justify-center"
+				>
+					<svg
+						class="w-5 h-5 mr-2"
+						fill="none"
+						stroke="currentColor"
+						viewBox="0 0 24 24"
+						xmlns="http://www.w3.org/2000/svg"
+					>
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M12 4v16m8-8H4"
+						></path>
+					</svg>
+					Mark Attendance
+				</button>
+			</div>
+
+			<!-- Message display -->
+			<div
+				id="message"
+				class="mt-4 p-3 rounded-lg text-center hidden"
+			></div>
+
+			<!-- Attendance status display -->
+			<div
+				id="statusCard"
+				class="mt-6 p-4 bg-gray-50 rounded-lg border border-gray-200 hidden fade-in"
+			>
+				<h2 class="text-lg font-semibold text-gray-800 mb-2">
+					Attendance Status
+				</h2>
+				<p id="statusText" class="text-gray-600"></p>
+			</div>
+		</div>
+
+		<script>
+			// Mock student ID (in a real app, this would come from authentication)
+			const studentId = 'student_123';
+
+			// Mock list of classes (in a real app, this would be fetched from the backend)
+			const classes = [
+				{ id: 'class_1', name: 'Math 101 - Section A' },
+				{ id: 'class_2', name: 'Science 202 - Section B' },
+				{ id: 'class_3', name: 'History 303 - Section C' },
+			];
+
+			// Function to mark attendance
+			async function markAttendance() {
+				const classSelect = document.getElementById('classSelect');
+				const dateSelect = document.getElementById('dateSelect');
+				const statusSelect = document.getElementById('statusSelect');
+				const markButton = document.getElementById('markButton');
+				const messageDiv = document.getElementById('message');
+				const attendanceForm =
+					document.getElementById('attendanceForm');
+
+				const classId = classSelect.value;
+				const date = dateSelect.value;
+				const status = statusSelect.value;
+
+				// Validation
+				if (!classId) {
+					showMessage(
+						'Please select a class.',
+						'bg-red-100 text-red-700'
+					);
+					return;
+				}
+				if (!date) {
+					showMessage(
+						'Please select a date.',
+						'bg-red-100 text-red-700'
+					);
+					return;
+				}
+
+				// Disable button and show loading state
+				markButton.disabled = true;
+				markButton.innerHTML =
+					'<span class="spinner"></span> Marking...';
+
+				// Prepare data to send to the backend
+				const attendanceData = {
+					studentId,
+					classId,
+					status,
+					date,
+				};
+
+				try {
+					// const response = await fetch('/api/attendance/mark', {
+					// 	method: 'POST',
+					// 	headers: {
+					// 		'Content-Type': 'application/json',
+					// 		Authorization: 'Bearer your_token_here',
+					// 	},
+					// 	body: JSON.stringify(attendanceData),
+					// });
+
+					const response = 'ok';
+
+					if (!response.ok) {
+						throw new Error('Failed to mark attendance.');
+					}
+
+					showMessage(
+						'Attendance marked successfully!',
+						'bg-green-100 text-green-700'
+					);
+
+					// Hide the form after successful submission
+					attendanceForm.classList.add('hidden');
+
+					// Fetch and display the attendance status
+					await fetchAttendanceStatus(classId, date);
+				} catch (error) {
+					console.error('Error marking attendance:', error);
+					showMessage(
+						'Failed to mark attendance. Please try again.',
+						'bg-red-100 text-red-700'
+					);
+				} finally {
+					// Re-enable button and reset text (in case of error)
+					markButton.disabled = false;
+					markButton.innerHTML = `
+          <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+          </svg>
+          Mark Attendance
+        `;
+				}
+			}
+
+			// Function to fetch and display attendance status
+			async function fetchAttendanceStatus(classId, date) {
+				const statusCard = document.getElementById('statusCard');
+				const statusText = document.getElementById('statusText');
+
+				try {
+					// Mock API call to fetch attendance status (replace with your actual API endpoint)
+					// const response = await fetch(`/api/attendance/status/${classId}?date=${date}&studentId=${studentId}`, {
+					//   headers: {
+					//     "Authorization": "Bearer your_token_here"
+					//   }
+					// });
+
+					// Mock response for demonstration
+					const responseData = {
+						status: document.getElementById('statusSelect').value, // Use the selected status for demo
+					};
+					// const responseData = await response.json();
+
+					const className =
+						classes.find((cls) => cls.id === classId)?.name ||
+						'Unknown Class';
+					statusText.textContent = `Your attendance for ${className} on ${date}: ${
+						responseData.status.charAt(0).toUpperCase() +
+						responseData.status.slice(1)
+					}`;
+					statusCard.classList.remove('hidden');
+					statusCard.classList.add('fade-in');
+				} catch (error) {
+					console.error('Error fetching attendance status:', error);
+					statusText.textContent =
+						'Unable to fetch attendance status.';
+					statusCard.classList.remove('hidden');
+					statusCard.classList.add('fade-in');
+				}
+			}
+
+			// Function to show success/error messages
+			function showMessage(message, classes) {
+				const messageDiv = document.getElementById('message');
+				messageDiv.textContent = message;
+				messageDiv.className = `mt-4 p-3 rounded-lg text-center ${classes}`;
+				messageDiv.classList.remove('hidden');
+
+				// Hide the message after 3 seconds
+				setTimeout(() => {
+					messageDiv.classList.add('hidden');
+				}, 3000);
+			}
+		</script>
+	</body>
+</html>

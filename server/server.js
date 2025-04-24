@@ -1,32 +1,19 @@
-const express = require('express');
-const cors = require('cors');
+const app = require('./app');
+const { connect } = require('mongoose');
+const { API_PORT, MONGO_URI } = process.env;
+const port = process.env.PORT || API_PORT;
 
-const app = express();
-const PORT = 3000;
+const connection = async () => {
+	try {
+		await connect(MONGO_URI);
+		console.log(`DB connection successful`);
 
-// Middleware
-app.use(cors()); 
-app.use(express.json());
+		app.listen(port, () =>
+			console.log(`Listening for requests on port ${port}`)
+		);
+	} catch (error) {
+		console.log(error.message);
+	}
+};
 
-// Example route
-app.post('/api/auth/login', (req, res) => {
-  const { username, password } = req.body;
-
-  // Replace this with real authentication logic
-  if (username === 'admin' && password === 'admin') {
-    return res.json({
-      token: 'fake-jwt-token',
-      user: {
-        username: 'admin',
-        role: 'admin'
-      }
-    });
-  }
-
-  res.status(401).send('Invalid credentials');
-});
-
-// Start server
-app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
-});
+connection();
