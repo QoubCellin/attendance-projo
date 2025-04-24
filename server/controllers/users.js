@@ -32,8 +32,8 @@ const generateToken = (payload) => {
 // generate otp
 
 const generateOTP = () => {
-	const min = 10000;
-	const max = 99999;
+	const min = 100000;
+	const max = 999999;
 	return Math.floor(Math.random() * (max - min + 1)) + min;
 };
 
@@ -92,11 +92,11 @@ const signin = async (req, res) => {
 };
 
 const verifyOTP = async (req, res) => {
-	const { otp, email } = req.body;
-	console.log(otp, email);
+	const { otp, admission_number } = req.body;
+	console.log(otp, admission_number);
 
 	try {
-		const user = await User.findOne({ email });
+		const user = await User.findOne({ admission_number });
 
 		const { accessToken } = generateToken({
 			admission_number: user.admission_number,
@@ -109,7 +109,7 @@ const verifyOTP = async (req, res) => {
 
 		if (!dbOTP) return res.status(401).json({ message: 'Invalid OTP' });
 
-		await User.findOneAndUpdate({ email }, { otp: null });
+		await User.findOneAndUpdate({ admission_number }, { otp: null });
 
 		res.status(200).json({
 			message: 'Authenticated successfully',

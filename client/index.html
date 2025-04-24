@@ -65,7 +65,8 @@
 			</h1>
 
 			<!-- Form to mark attendance -->
-			<div id="attendanceForm" class="space-y-4">
+			<!-- Form to mark attendance -->
+			<form id="attendanceForm" class="space-y-4">
 				<div>
 					<label
 						for="classSelect"
@@ -112,7 +113,7 @@
 				</div>
 				<button
 					id="markButton"
-					onclick="markAttendance()"
+					type="submit"
 					class="w-full bg-green-500 text-white p-3 rounded-lg hover:bg-green-600 transition flex items-center justify-center"
 				>
 					<svg
@@ -131,7 +132,7 @@
 					</svg>
 					Mark Attendance
 				</button>
-			</div>
+			</form>
 
 			<!-- Message display -->
 			<div
@@ -162,8 +163,32 @@
 				{ id: 'class_3', name: 'History 303 - Section C' },
 			];
 
-			// Function to mark attendance
-			async function markAttendance() {
+			const admission_number = localStorage.getItem('admission_number');
+			const encodedAdmissionNumber = encodeURIComponent(admission_number);
+
+			const fetchUser = async () => {
+				try {
+					const response = await fetch(
+						`http://localhost:5000/api/auth/user/check-admission/${encodedAdmissionNumber}`,
+						{
+							method: 'GET',
+							headers: {
+								'Content-Type': 'application/json',
+							},
+						}
+					);
+					const data = await response.json();
+
+					return data._id;
+				} catch (error) {
+					console.log(error.message);
+				}
+			};
+
+			// Define the markAttendance function globally
+			async function markAttendance(event) {
+				if (event) event.preventDefault(); // Prevent form submission
+
 				const classSelect = document.getElementById('classSelect');
 				const dateSelect = document.getElementById('dateSelect');
 				const statusSelect = document.getElementById('statusSelect');
@@ -197,25 +222,30 @@
 				markButton.innerHTML =
 					'<span class="spinner"></span> Marking...';
 
+				const { id } = fetchUser();
+
 				// Prepare data to send to the backend
 				const attendanceData = {
-					studentId,
+					studentId: id,
 					classId,
 					status,
 					date,
 				};
 
-				try {
-					// const response = await fetch('/api/attendance/mark', {
-					// 	method: 'POST',
-					// 	headers: {
-					// 		'Content-Type': 'application/json',
-					// 		Authorization: 'Bearer your_token_here',
-					// 	},
-					// 	body: JSON.stringify(attendanceData),
-					// });
+				console.log(fetchUser());
 
-					const response = 'ok';
+				try {
+					const response = await fetch(
+						'http://localhost:5000/api/attendance/mark-attendance',
+						{
+							method: 'POST',
+							headers: {
+								'Content-Type': 'application/json',
+								Authorization: 'Bearer your_token_here',
+							},
+							body: JSON.stringify(attendanceData),
+						}
+					);
 
 					if (!response.ok) {
 						throw new Error('Failed to mark attendance.');
@@ -241,13 +271,21 @@
 					// Re-enable button and reset text (in case of error)
 					markButton.disabled = false;
 					markButton.innerHTML = `
-          <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-          </svg>
-          Mark Attendance
-        `;
+			                     <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+			                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+			                     </svg>
+			                     Mark Attendance
+			                 `;
 				}
 			}
+
+			// Add event listener to the form
+			document.addEventListener('DOMContentLoaded', function () {
+				const form = document.getElementById('attendanceForm');
+				if (form) {
+					form.addEventListener('submit', markAttendance);
+				}
+			});
 
 			// Function to fetch and display attendance status
 			async function fetchAttendanceStatus(classId, date) {

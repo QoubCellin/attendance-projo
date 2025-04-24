@@ -475,6 +475,7 @@
     passwordInput.addEventListener('input', handleInputChange);
 
     // Handle form submission
+    // Handle form submission
     loginForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         
@@ -495,35 +496,27 @@
                         password: passwordInput.value 
                     })
                 });
-                // verifyOtp()
 
                 if (!response.ok) {
                     const errorData = await response.text();
                     throw new Error(errorData || 'Login failed');
                 }
 
-                if (response.success) {
-                    // Show the OTP modal
-                    const otpModal = new bootstrap.Modal(
-                        document.getElementById('otpVerificationModal')
-                    );
-                    otpModal.show();
-                } else {
-                    alert(`Error: ${response.message}`);
-                }
-
                 const data = await response.json();
-                console.log('Login successful:', response);
+                console.log('Login successful:', data);
 
-                
+                // Show the OTP modal
+                const otpModal = new bootstrap.Modal(document.getElementById('otpVerificationModal'));
+                otpModal.show();
 
-                // window.location.href = '../index.html';
+
             } catch (err) {
                 console.error('Login error:', err);
                 alert(err.message || 'An error occurred during login');
             }
         }
     });
+
 
     let debounceTimer;
 
@@ -590,19 +583,31 @@
             const response = await fetch('http://localhost:5000/api/auth/verify_otp', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ otp }),
+                body: JSON.stringify({ 
+                    otp,
+                    admission_number: admissionNumberInput.value // Include admission number for verification
+                }),
             });
+            console.log('OTP verification response:', response, admissionNumberInput.value);
+
+            if (!response.ok) {
+                throw new Error('OTP verification failed');
+            }
 
             const result = await response.json();
+            console.log(result)
 
-            if (result.success) {
+            if (response.ok) {
+                // Close the modal
                 const otpModal = bootstrap.Modal.getInstance(
                     document.getElementById('otpVerificationModal')
                 );
-                localStorage.setItem('token', data.accesToken);
-                // localStorage.setItem('user', JSON.stringify(data.email));
                 otpModal.hide();
-                window.location.href = 'index.html';
+               
+                localStorage.setItem('admission_number', admissionNumberInput.value);
+                
+                window.location.href = '../index.html';
+               
             } else {
                 alert(`Error: ${result.message}`);
             }
@@ -615,6 +620,7 @@
             submitButton.textContent = 'Verify OTP';
         }
     };
+
 
 
 
@@ -635,5 +641,6 @@
     };
     
 </script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
