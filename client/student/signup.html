@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Attendance System - Login</title>
+  <link href="assets/css/bootstrap.min.css" id="bootstrap-style" rel="stylesheet" type="text/css" />
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
@@ -203,79 +204,226 @@
         text-decoration: none;
         font-size: 0.9rem;
     }
+
+    /* New styles for validation */
+    .error-message {
+        color: #e63946;
+        font-size: 0.8rem;
+        margin-top: 5px;
+        display: block;
+        transition: all 0.3s ease;
+    }
+
+    .form-control.is-invalid {
+        border-color: #e63946;
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='none' stroke='%23e63946' viewBox='0 0 12 12'%3e%3ccircle cx='6' cy='6' r='4.5'/%3e%3cpath stroke-linejoin='round' d='M5.8 3.6h.4L6 6.5z'/%3e%3ccircle cx='6' cy='8.2' r='.6' fill='%23e63946' stroke='none'/%3e%3c/svg%3e");
+        background-repeat: no-repeat;
+        background-position: right calc(0.375em + 0.1875rem) center;
+        background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
+    }
+
+    .form-control.is-valid {
+        border-color: #28a745;
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 8 8'%3e%3cpath fill='%2328a745' d='M2.3 6.73L.6 4.53c-.4-1.04.46-1.4 1.1-.8l1.1 1.4 3.4-3.8c.6-.63 1.6-.27 1.2.7l-4 4.6c-.43.5-.8.4-1.1.1z'/%3e%3c/svg%3e");
+        background-repeat: no-repeat;
+        background-position: right calc(0.375em + 0.1875rem) center;
+        background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
+    }
 </style>
 
 <div class="login-container">
     <div class="university-logo">U</div>
     <div class="login-header">
-        <h2>Attendance recording system<h2>
+        <h2>Attendance recording system</h2>
     </div>
     <div class="login-content">
-        <form id="loginForm">
-            
+        <form id="registerForm">
+            <div class="form-group">
+                <label for="admission_number">Admission number</label>
+                <input type="text" name="admission_number" id="admission_number" class="form-control" placeholder="e.g. BUS-231-040/2023">
+                <span id="admission_number_error" class="error-message"></span>
+            </div>
+            <div class="form-group">
+                <label for="admission_number">Email</label>
+                <input type="text" name="email" id="email" class="form-control" placeholder="e.g. email@example.com">
+                <span id="email_error" class="error-message"></span>
+            </div>
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" name="password" id="password" class="form-control" placeholder="Enter your password">
+                <span id="password_error" class="error-message"></span>
+            </div>
+            <div class="remember-forgot">
+                <div class="remember-me">
+                    <input type="checkbox" id="remember">
+                    <label for="remember">Remember me</label>
+                </div>
+                <div class="forgot-password">
+                    <a href="#">Forgot password?</a>
+                </div>
+            </div>
+            <button type="submit" class="btn-login">Sign Up</button>
         </form>
-        <div class="form-group">
-            <label for="username">Admission number</label>
-            <input type="text" id="username" class="form-control" placeholder="Enter your student ID or email">
-        </div>
-        <div class="form-group">
-            <label for="password">Password</label>
-            <input type="password" id="password" class="form-control" placeholder="Enter your password">
-        </div>
-        <div class="remember-forgot">
-            <div class="remember-me">
-                <input type="checkbox" id="remember">
-                <label for="remember">Remember me</label>
-            </div>
-            <div class="forgot-password">
-                <a href="#">Forgot password?</a>
-            </div>
-        </div>
-        <button type="submit" class="btn-login">Sign In</button>
     </div>
     <div class="login-footer">
-        New student? <a href="#">Create account</a> or <a href="#">Contact admin</a>
+        <p>Alrady have an account? <a href="login.html">Sign in</a></p>
     </div>
 </div>
 
-  <script>
-    document.getElementById('loginForm').addEventListener('submit', async (e) => {
-      e.preventDefault();
+<script>
+    const registerForm = document.getElementById('registerForm');
+    const admissionNumberInput = document.getElementById('admission_number');
+    const passwordInput = document.getElementById('password');
+    const emailInput = document.getElementById('email');
+    const admissionNumberError = document.getElementById('admission_number_error');
+    const passwordError = document.getElementById('password_error');
 
-      const username = document.getElementById('username').value;
-      const password = document.getElementById('password').value;
+    // Get current year
+    const currentYear = new Date().getFullYear();
+    
+    // List of valid faculties
+    const validFaculties = ['CIT', 'BUS', 'MCS', 'SCT', 'SST', 'ENG'];
 
-      try {
-        const response = await fetch('http://localhost:3000/api/auth/login', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({ username, password })
-        });
-
-        if (!response.ok) {
-          const errorData = await response.text();
-          throw new Error(errorData || 'Login failed');
+    // Validation rules
+    const validations = {
+        admission_number: {
+            required: true,
+            custom: (value) => {
+                // Format: CIT-221-040/2021
+                const regex = /^([A-Z]{3})-(\d{3})-(\d{3})\/(\d{4})$/;
+                const match = value.match(regex);
+                
+                if (!match) {
+                    return {
+                        valid: false,
+                        message: "Format should be XXX-000-000/0000 (e.g. CIT-221-040/2021)"
+                    };
+                }
+                
+                const [, faculty, , , year] = match;
+                
+                // Check if faculty is valid
+                if (!validFaculties.includes(faculty)) {
+                    return {
+                        valid: false,
+                        message: `Faculty must be one of: ${validFaculties.join(', ')}`
+                    };
+                }
+                
+                // Check if year is valid (less than current year)
+                const yearNum = parseInt(year);
+                if (yearNum >= currentYear) {
+                    return {
+                        valid: false,
+                        message: `Year must be less than current year (${currentYear})`
+                    };
+                }
+                
+                return { valid: true };
+            },
+            messages: {
+                required: "Admission number is required"
+            }
+        },
+        password: {
+            required: true,
+            minLength: 6,
+            messages: {
+                required: "Password is required",
+                minLength: "Password must be at least 6 characters long"
+            }
         }
+    };
 
-        const data = await response.json();
-
-        localStorage.setItem('token', data.token);
-        localStorage.setItem('user', JSON.stringify(data.user));
-
-        if (data.user.role === 'student') {
-          window.location.href = '/student/dashboard.html';
-        } else if (data.user.role === 'lecturer') {
-          window.location.href = '/lecturer/dashboard.html';
-        } else {
-          window.location.href = '/admin/dashboard.html';
+    // Validate a single field
+    const validateField = (field, value) => {
+        const rules = validations[field];
+        const errorElement = document.getElementById(`${field}_error`);
+        const inputElement = document.getElementById(field);
+        
+        // Reset validation state
+        errorElement.textContent = '';
+        inputElement.classList.remove('is-invalid', 'is-valid');
+        
+        // Check required
+        if (rules.required && !value.trim()) {
+            errorElement.textContent = rules.messages.required;
+            inputElement.classList.add('is-invalid');
+            return false;
         }
-      } catch (err) {
-        console.error('Login error:', err);
-        alert(err.message || 'An error occurred during login');
-      }
+        
+        // Check custom validation if exists
+        if (rules.custom) {
+            const result = rules.custom(value);
+            if (!result.valid) {
+                errorElement.textContent = result.message;
+                inputElement.classList.add('is-invalid');
+                return false;
+            }
+        }
+        
+        // Check minLength if exists
+        if (rules.minLength && value.length < rules.minLength) {
+            errorElement.textContent = rules.messages.minLength;
+            inputElement.classList.add('is-invalid');
+            return false;
+        }
+        
+        inputElement.classList.add('is-valid');
+        return true;
+    };
+
+    // Handle input changes for real-time validation
+    const handleInputChange = (e) => {
+        const { name, value } = e.target;
+        validateField(name, value);
+    };
+
+    // Add input event listeners for real-time validation
+    admissionNumberInput.addEventListener('input', handleInputChange);
+    passwordInput.addEventListener('input', handleInputChange);
+
+    registerForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        // Validate all fields
+        const admissionNumberValid = validateField('admission_number', admissionNumberInput.value);
+        const passwordValid = validateField('password', passwordInput.value);
+        
+        // If all validations pass, proceed with login
+        if (admissionNumberValid && passwordValid) {
+            try {
+                const response = await fetch('http://localhost:5000/api/auth/register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ 
+                        admission_number: admissionNumberInput.value, 
+                        password: passwordInput.value,
+                        email: emailInput.value
+                    })
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.text();
+                    throw new Error(errorData || 'Login failed');
+                }
+
+                window.location.href = 'login.html';
+
+                const data = await response.json();
+                console.log('Signup successful:', data);
+
+
+            } catch (err) {
+                console.error('Login error:', err);
+                alert(err.message || 'An error occurred during login');
+            }
+        }
     });
-  </script>
+    
+</script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

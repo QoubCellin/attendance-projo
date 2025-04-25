@@ -166,25 +166,6 @@
 			const admission_number = localStorage.getItem('admission_number');
 			const encodedAdmissionNumber = encodeURIComponent(admission_number);
 
-			const fetchUser = async () => {
-				try {
-					const response = await fetch(
-						`http://localhost:5000/api/auth/user/check-admission/${encodedAdmissionNumber}`,
-						{
-							method: 'GET',
-							headers: {
-								'Content-Type': 'application/json',
-							},
-						}
-					);
-					const data = await response.json();
-
-					return data._id;
-				} catch (error) {
-					console.log(error.message);
-				}
-			};
-
 			// Define the markAttendance function globally
 			async function markAttendance(event) {
 				if (event) event.preventDefault(); // Prevent form submission
@@ -222,19 +203,25 @@
 				markButton.innerHTML =
 					'<span class="spinner"></span> Marking...';
 
-				const { id } = fetchUser();
-
 				// Prepare data to send to the backend
 				const attendanceData = {
-					studentId: id,
 					classId,
 					status,
 					date,
 				};
 
-				console.log(fetchUser());
-
 				try {
+					const userRes = await fetch(
+						`http://localhost:5000/api/auth/user/check-admission/${encodedAdmissionNumber}`,
+						{
+							method: 'GET',
+							headers: {
+								'Content-Type': 'application/json',
+							},
+						}
+					);
+					const data = await userRes.json();
+
 					const response = await fetch(
 						'http://localhost:5000/api/attendance/mark-attendance',
 						{
@@ -243,7 +230,10 @@
 								'Content-Type': 'application/json',
 								Authorization: 'Bearer your_token_here',
 							},
-							body: JSON.stringify(attendanceData),
+							body: JSON.stringify({
+								...attendanceData,
+								studentId: data.id,
+							}),
 						}
 					);
 
