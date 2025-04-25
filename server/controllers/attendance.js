@@ -66,4 +66,14 @@ const markAttendance = async (req, res) => {
 	}
 };
 
+// const viewAttendance = async(req, res) => {
+// 	const {admission_number} = req.params
+
+// 	try {
+// 		const attendance = Attendance.find
+// 	} catch (error) {
+// 		res.status(500).json({ message: error.message })
+// 	}
+// }
+
 module.exports = { markAttendance };

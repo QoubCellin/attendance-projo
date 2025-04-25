@@ -1,331 +1,646 @@
 <!DOCTYPE html>
 <html lang="en">
-	<head>
-		<meta charset="UTF-8" />
-		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<title>Student Attendance</title>
-		<!-- Tailwind CSS CDN -->
-		<script src="https://cdn.tailwindcss.com"></script>
-		<style>
-			/* Fade-in animation for the status card */
-			@keyframes fadeIn {
-				from {
-					opacity: 0;
-					transform: translateY(10px);
-				}
-				to {
-					opacity: 1;
-					transform: translateY(0);
-				}
-			}
-			.fade-in {
-				animation: fadeIn 0.5s ease-in-out;
-			}
-			/* Spinner animation */
-			.spinner {
-				border: 4px solid rgba(0, 0, 0, 0.1);
-				border-left-color: #4caf50;
-				border-radius: 50%;
-				width: 24px;
-				height: 24px;
-				animation: spin 1s linear infinite;
-				display: inline-block;
-			}
-			@keyframes spin {
-				to {
-					transform: rotate(360deg);
-				}
-			}
-		</style>
-	</head>
-	<body
-		class="min-h-screen bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center p-4"
-	>
-		<div
-			class="container max-w-md w-full bg-white rounded-xl shadow-lg p-6"
-		>
-			<h1
-				class="text-2xl font-bold text-gray-800 text-center mb-6 flex items-center justify-center"
-			>
-				<svg
-					class="w-6 h-6 mr-2 text-green-500"
-					fill="none"
-					stroke="currentColor"
-					viewBox="0 0 24 24"
-					xmlns="http://www.w3.org/2000/svg"
-				>
-					<path
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						stroke-width="2"
-						d="M5 13l4 4L19 7"
-					></path>
-				</svg>
-				Mark Your Attendance
-			</h1>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Attendance System - Login</title>
+  <link href="assets/css/bootstrap.min.css" id="bootstrap-style" rel="stylesheet" type="text/css" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+    
+    body {
+        font-family: 'Poppins', sans-serif;
+        margin: 0;
+        padding: 0;
+        height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background: url('https://images.unsplash.com/photo-1523050854058-8df90110c9f1?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80') no-repeat center center;
+        background-size: cover;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    body::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(255, 255, 255, 0.85);
+        z-index: 0;
+    }
+    
+    .login-container {
+        width: 420px;
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+        overflow: hidden;
+        position: relative;
+        z-index: 1;
+        transform: translateY(0);
+        transition: transform 0.4s ease, box-shadow 0.4s ease;
+    }
+    
+    .login-container:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+    }
+    
+    .login-header {
+        background: #1a3e8c; /* Deep blue */
+        color: white;
+        padding: 28px;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .login-header h2 {
+        margin: 0;
+        font-size: 1.8rem;
+        font-weight: 600;
+        position: relative;
+        z-index: 1;
+    }
+    
+    .login-header::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: 4px;
+        background: #e63946; /* Vibrant red */
+    }
+    
+    .login-content {
+        padding: 30px 40px;
+    }
+    
+    .form-group {
+        margin-bottom: 25px;
+        position: relative;
+    }
+    
+    .form-group label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 500;
+        color: #333;
+        font-size: 0.95rem;
+    }
+    
+    .form-control {
+        width: 100%;
+        padding: 14px 18px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        font-size: 0.95rem;
+        transition: all 0.3s;
+        box-sizing: border-box;
+        background: #f9f9f9;
+    }
+    
+    .form-control:focus {
+        border-color: #1a3e8c;
+        box-shadow: 0 0 0 3px rgba(26, 62, 140, 0.1);
+        outline: none;
+        background: white;
+    }
+    
+    .btn-login {
+        width: 100%;
+        padding: 14px;
+        background: #1a3e8c; /* Deep blue */
+        border: none;
+        border-radius: 8px;
+        color: white;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s;
+        margin-top: 10px;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .btn-login::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg,transparent, rgba(255, 255, 255, 0.2), transparent);
+        transition: 0.5s;
+    }
+    
+    .btn-login:hover {
+        background: #0d2b66;
+    }
+    
+    .btn-login:hover::before {
+        left: 100%;
+    }
+    
+    .login-footer {
+        text-align: center;
+        padding: 20px;
+        border-top: 1px solid #eee;
+        font-size: 0.9rem;
+        color: #666;
+    }
+    
+    .login-footer a {
+        color: #1a3e8c;
+        text-decoration: none;
+        font-weight: 500;
+        transition: color 0.3s;
+    }
+    
+    .login-footer a:hover {
+        color: #e63946;
+    }
+    
+    .university-logo {
+        position: absolute;
+        top: 20px;
+        left: 20px;
+        width: 40px;
+        height: 40px;
+        background: #e63946;
+        border-radius: 60%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: bold;
+        font-size: 1.2rem;
+    }
+    
+    .remember-forgot {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+    
+    .remember-me {
+        display: flex;
+        align-items: center;
+    }
+    
+    .remember-me input {
+        margin-right: 8px;
+    }
+    
+    .forgot-password a {
+        color: #e63946;
+        text-decoration: none;
+        font-size: 0.9rem;
+    }
 
-			<!-- Form to mark attendance -->
-			<!-- Form to mark attendance -->
-			<form id="attendanceForm" class="space-y-4">
-				<div>
-					<label
-						for="classSelect"
-						class="block text-sm font-medium text-gray-700 mb-1"
-						>Select Class</label
-					>
-					<select
-						id="classSelect"
-						class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition"
-					>
-						<option value="">-- Select a Class --</option>
-						<option value="class_1">Math 101 - Section A</option>
-						<option value="class_2">Science 202 - Section B</option>
-						<option value="class_3">History 303 - Section C</option>
-					</select>
-				</div>
-				<div>
-					<label
-						for="dateSelect"
-						class="block text-sm font-medium text-gray-700 mb-1"
-						>Select Date</label
-					>
-					<input
-						type="date"
-						id="dateSelect"
-						class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition"
-						value="2025-04-24"
-					/>
-				</div>
-				<div>
-					<label
-						for="statusSelect"
-						class="block text-sm font-medium text-gray-700 mb-1"
-						>Attendance Status</label
-					>
-					<select
-						id="statusSelect"
-						class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition"
-					>
-						<option value="present">Present</option>
-						<option value="late">Late</option>
-						<option value="excused">Excused</option>
-					</select>
-				</div>
-				<button
-					id="markButton"
-					type="submit"
-					class="w-full bg-green-500 text-white p-3 rounded-lg hover:bg-green-600 transition flex items-center justify-center"
-				>
-					<svg
-						class="w-5 h-5 mr-2"
-						fill="none"
-						stroke="currentColor"
-						viewBox="0 0 24 24"
-						xmlns="http://www.w3.org/2000/svg"
-					>
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="2"
-							d="M12 4v16m8-8H4"
-						></path>
-					</svg>
-					Mark Attendance
-				</button>
-			</form>
+    /* New styles for validation */
+    .error-message {
+        color: #e63946;
+        font-size: 0.8rem;
+        margin-top: 5px;
+        display: block;
+        transition: all 0.3s ease;
+    }
 
-			<!-- Message display -->
-			<div
-				id="message"
-				class="mt-4 p-3 rounded-lg text-center hidden"
-			></div>
+    .form-control.is-invalid {
+        border-color: #e63946;
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='none' stroke='%23e63946' viewBox='0 0 12 12'%3e%3ccircle cx='6' cy='6' r='4.5'/%3e%3cpath stroke-linejoin='round' d='M5.8 3.6h.4L6 6.5z'/%3e%3ccircle cx='6' cy='8.2' r='.6' fill='%23e63946' stroke='none'/%3e%3c/svg%3e");
+        background-repeat: no-repeat;
+        background-position: right calc(0.375em + 0.1875rem) center;
+        background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
+    }
 
-			<!-- Attendance status display -->
-			<div
-				id="statusCard"
-				class="mt-6 p-4 bg-gray-50 rounded-lg border border-gray-200 hidden fade-in"
-			>
-				<h2 class="text-lg font-semibold text-gray-800 mb-2">
-					Attendance Status
-				</h2>
-				<p id="statusText" class="text-gray-600"></p>
-			</div>
-		</div>
+    .form-control.is-valid {
+        border-color: #28a745;
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 8 8'%3e%3cpath fill='%2328a745' d='M2.3 6.73L.6 4.53c-.4-1.04.46-1.4 1.1-.8l1.1 1.4 3.4-3.8c.6-.63 1.6-.27 1.2.7l-4 4.6c-.43.5-.8.4-1.1.1z'/%3e%3c/svg%3e");
+        background-repeat: no-repeat;
+        background-position: right calc(0.375em + 0.1875rem) center;
+        background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
+    }
+</style>
 
-		<script>
-			// Mock student ID (in a real app, this would come from authentication)
-			const studentId = 'student_123';
+<div class="login-container">
+    <div class="university-logo">U</div>
+    <div class="login-header">
+        <h2>Attendance recording system</h2>
+    </div>
+    <div class="login-content">
+        <form id="loginForm">
+            <div class="form-group">
+                <label for="admission_number">Admission number</label>
+                <input type="text" name="admission_number" id="admission_number" class="form-control" placeholder="e.g. BUS-231-040/2023">
+                <span id="admission_number_error" class="error-message"></span>
+            </div>
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" name="password" id="password" class="form-control" placeholder="Enter your password">
+                <span id="password_error" class="error-message"></span>
+            </div>
+            <div class="remember-forgot">
+                <div class="remember-me">
+                    <input type="checkbox" id="remember">
+                    <label for="remember">Remember me</label>
+                </div>
+                <div class="forgot-password">
+                    <a href="#">Forgot password?</a>
+                </div>
+            </div>
+            <button type="submit" class="btn-login">Sign In</button>
+        </form>
+    </div>
+    <div class="login-footer">
+        <p>Don't have an account? <a href="signup.html">Sign up</a></p>
+    </div>
+</div>
+<div
+        class="modal fade"
+        id="otpVerificationModal"
+        tabindex="-1"
+        aria-labelledby="otpVerificationModalLabel"
+        aria-hidden="true"
+    >
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form
+                    id="otpForm"
+                    onsubmit="event.preventDefault(); verifyOtp();"
+                >
+                    <div class="modal-header">
+                        <h5
+                            class="modal-title"
+                            id="otpVerificationModalLabel"
+                        >
+                            OTP Verification
+                        </h5>
+                        <button
+                            type="button"
+                            class="btn-close"
+                            data-bs-dismiss="modal"
+                            aria-label="Close"
+                        ></button>
+                    </div>
+                    <div class="modal-body">
+                        <p>
+                            Please enter the OTP sent to your registered
+                            email.
+                        </p>
+                        <div class="d-flex justify-content-center gap-2">
+                            <input
+                                type="text"
+                                class="form-control otp-input"
+                                maxlength="1"
+                                id="otp1"
+                                oninput="moveToNext(this, 'otp2')"
+                            />
+                            <input
+                                type="text"
+                                class="form-control otp-input"
+                                maxlength="1"
+                                id="otp2"
+                                oninput="moveToNext(this, 'otp3')"
+                                onkeydown="moveToPrevious(event, 'otp1')"
+                            />
+                            <input
+                                type="text"
+                                class="form-control otp-input"
+                                maxlength="1"
+                                id="otp3"
+                                oninput="moveToNext(this, 'otp4')"
+                                onkeydown="moveToPrevious(event, 'otp2')"
+                            />
+                            <input
+                                type="text"
+                                class="form-control otp-input"
+                                maxlength="1"
+                                id="otp4"
+                                oninput="moveToNext(this, 'otp5')"
+                                onkeydown="moveToPrevious(event, 'otp3')"
+                            />
+                            <input
+                                type="text"
+                                class="form-control otp-input"
+                                maxlength="1"
+                                id="otp5"
+                                oninput="moveToNext(this, 'otp6')"
+                                onkeydown="moveToPrevious(event, 'otp4')"
+                            />
+                            <input
+                                type="text"
+                                class="form-control otp-input"
+                                maxlength="1"
+                                id="otp6"
+                                onkeydown="moveToPrevious(event, 'otp5')"
+                            />
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button
+                            type="button"
+                            class="btn btn-secondary"
+                            data-bs-dismiss="modal"
+                        >
+                            Cancel
+                        </button>
+                        <button type="submit" class="btn btn-primary">
+                            Verify OTP
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 
-			// Mock list of classes (in a real app, this would be fetched from the backend)
-			const classes = [
-				{ id: 'class_1', name: 'Math 101 - Section A' },
-				{ id: 'class_2', name: 'Science 202 - Section B' },
-				{ id: 'class_3', name: 'History 303 - Section C' },
-			];
+<script>
+    const loginForm = document.getElementById('loginForm');
+    const admissionNumberInput = document.getElementById('admission_number');
+    const passwordInput = document.getElementById('password');
+    const admissionNumberError = document.getElementById('admission_number_error');
+    const passwordError = document.getElementById('password_error');
 
-			const admission_number = localStorage.getItem('admission_number');
-			const encodedAdmissionNumber = encodeURIComponent(admission_number);
+    // Get current year
+    const currentYear = new Date().getFullYear();
+    
+    // List of valid faculties
+    const validFaculties = ['CIT', 'BUS', 'MCS', 'SCT', 'SST', 'ENG'];
 
-			// Define the markAttendance function globally
-			async function markAttendance(event) {
-				if (event) event.preventDefault(); // Prevent form submission
+    // Validation rules
+    const validations = {
+        admission_number: {
+            required: true,
+            custom: (value) => {
+                // Format: CIT-221-040/2021
+                const regex = /^([A-Z]{3})-(\d{3})-(\d{3})\/(\d{4})$/;
+                const match = value.match(regex);
+                
+                if (!match) {
+                    return {
+                        valid: false,
+                        message: "Format should be XXX-000-000/0000 (e.g. CIT-221-040/2021)"
+                    };
+                }
+                
+                const [, faculty, , , year] = match;
+                
+                // Check if faculty is valid
+                if (!validFaculties.includes(faculty)) {
+                    return {
+                        valid: false,
+                        message: `Faculty must be one of: ${validFaculties.join(', ')}`
+                    };
+                }
+                
+                // Check if year is valid (less than current year)
+                const yearNum = parseInt(year);
+                if (yearNum >= currentYear) {
+                    return {
+                        valid: false,
+                        message: `Year must be less than current year (${currentYear})`
+                    };
+                }
+                
+                return { valid: true };
+            },
+            messages: {
+                required: "Admission number is required"
+            }
+        },
+        password: {
+            required: true,
+            minLength: 6,
+            messages: {
+                required: "Password is required",
+                minLength: "Password must be at least 6 characters long"
+            }
+        }
+    };
 
-				const classSelect = document.getElementById('classSelect');
-				const dateSelect = document.getElementById('dateSelect');
-				const statusSelect = document.getElementById('statusSelect');
-				const markButton = document.getElementById('markButton');
-				const messageDiv = document.getElementById('message');
-				const attendanceForm =
-					document.getElementById('attendanceForm');
+    // Validate a single field
+    const validateField = (field, value) => {
+        const rules = validations[field];
+        const errorElement = document.getElementById(`${field}_error`);
+        const inputElement = document.getElementById(field);
+        
+        // Reset validation state
+        errorElement.textContent = '';
+        inputElement.classList.remove('is-invalid', 'is-valid');
+        
+        // Check required
+        if (rules.required && !value.trim()) {
+            errorElement.textContent = rules.messages.required;
+            inputElement.classList.add('is-invalid');
+            return false;
+        }
+        
+        // Check custom validation if exists
+        if (rules.custom) {
+            const result = rules.custom(value);
+            if (!result.valid) {
+                errorElement.textContent = result.message;
+                inputElement.classList.add('is-invalid');
+                return false;
+            }
+        }
+        
+        // Check minLength if exists
+        if (rules.minLength && value.length < rules.minLength) {
+            errorElement.textContent = rules.messages.minLength;
+            inputElement.classList.add('is-invalid');
+            return false;
+        }
+        
+        inputElement.classList.add('is-valid');
+        return true;
+    };
 
-				const classId = classSelect.value;
-				const date = dateSelect.value;
-				const status = statusSelect.value;
+    // Handle input changes for real-time validation
+    const handleInputChange = (e) => {
+        const { name, value } = e.target;
+        validateField(name, value);
+    };
 
-				// Validation
-				if (!classId) {
-					showMessage(
-						'Please select a class.',
-						'bg-red-100 text-red-700'
-					);
-					return;
-				}
-				if (!date) {
-					showMessage(
-						'Please select a date.',
-						'bg-red-100 text-red-700'
-					);
-					return;
-				}
+    // Add input event listeners for real-time validation
+    admissionNumberInput.addEventListener('input', handleInputChange);
+    passwordInput.addEventListener('input', handleInputChange);
 
-				// Disable button and show loading state
-				markButton.disabled = true;
-				markButton.innerHTML =
-					'<span class="spinner"></span> Marking...';
+    // Handle form submission
+    // Handle form submission
+    loginForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        // Validate all fields
+        const admissionNumberValid = validateField('admission_number', admissionNumberInput.value);
+        const passwordValid = validateField('password', passwordInput.value);
+        
+        // If all validations pass, proceed with login
+        if (admissionNumberValid && passwordValid) {
+            try {
+                const response = await fetch('http://localhost:5000/api/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ 
+                        admission_number: admissionNumberInput.value, 
+                        password: passwordInput.value 
+                    })
+                });
 
-				// Prepare data to send to the backend
-				const attendanceData = {
-					classId,
-					status,
-					date,
-				};
+                if (!response.ok) {
+                    const errorData = await response.text();
+                    throw new Error(errorData || 'Login failed');
+                }
 
-				try {
-					const userRes = await fetch(
-						`http://localhost:5000/api/auth/user/check-admission/${encodedAdmissionNumber}`,
-						{
-							method: 'GET',
-							headers: {
-								'Content-Type': 'application/json',
-							},
-						}
-					);
-					const data = await userRes.json();
+                const data = await response.json();
+                console.log('Login successful:', data);
 
-					const response = await fetch(
-						'http://localhost:5000/api/attendance/mark-attendance',
-						{
-							method: 'POST',
-							headers: {
-								'Content-Type': 'application/json',
-								Authorization: 'Bearer your_token_here',
-							},
-							body: JSON.stringify({
-								...attendanceData,
-								studentId: data.id,
-							}),
-						}
-					);
+                // Show the OTP modal
+                const otpModal = new bootstrap.Modal(document.getElementById('otpVerificationModal'));
+                otpModal.show();
 
-					if (!response.ok) {
-						throw new Error('Failed to mark attendance.');
-					}
 
-					showMessage(
-						'Attendance marked successfully!',
-						'bg-green-100 text-green-700'
-					);
+            } catch (err) {
+                console.error('Login error:', err);
+                alert(err.message || 'An error occurred during login');
+            }
+        }
+    });
 
-					// Hide the form after successful submission
-					attendanceForm.classList.add('hidden');
 
-					// Fetch and display the attendance status
-					await fetchAttendanceStatus(classId, date);
-				} catch (error) {
-					console.error('Error marking attendance:', error);
-					showMessage(
-						'Failed to mark attendance. Please try again.',
-						'bg-red-100 text-red-700'
-					);
-				} finally {
-					// Re-enable button and reset text (in case of error)
-					markButton.disabled = false;
-					markButton.innerHTML = `
-			                     <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-			                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-			                     </svg>
-			                     Mark Attendance
-			                 `;
-				}
-			}
+    let debounceTimer;
 
-			// Add event listener to the form
-			document.addEventListener('DOMContentLoaded', function () {
-				const form = document.getElementById('attendanceForm');
-				if (form) {
-					form.addEventListener('submit', markAttendance);
-				}
-			});
+    admissionNumberInput.addEventListener('input', function(e) {
+        handleInputChange(e);
+        clearTimeout(debounceTimer);
+        
+        // Set a new timeout to avoid too many requests
+        debounceTimer = setTimeout(async () => {
+            const admissionNumber = e.target.value;
+            const encodedAdmissionNumber = encodeURIComponent(admissionNumber);
+            
+            // Only proceed if the admission number passes validation
+            if (validateField('admission_number', admissionNumber)) {
+                try {
+                    const response = await fetch(`http://localhost:5000/api/auth/user/check-admission/${encodedAdmissionNumber}`, {
+                        method: 'GET',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    });
+                    
+                    if (!response.ok) {
+                        // If user not found, we can show a message but still allow login attempt
+                        admissionNumberError.textContent = "User not found. Please check your admission number.";
+                        admissionNumberInput.classList.add('is-invalid');
+                        return;
+                    }
+                    
+                    const userData = await response.json();
+                    console.log("User found:", userData);
+                    
+                } catch (err) {
+                    console.error('Error checking admission number:', err);
+                    // Don't show error to user, just log it
+                }
+            }
+        }, 500); // 500ms debounce time
+    });
 
-			// Function to fetch and display attendance status
-			async function fetchAttendanceStatus(classId, date) {
-				const statusCard = document.getElementById('statusCard');
-				const statusText = document.getElementById('statusText');
+    const verifyOtp = async () => {
+        // Collect the OTP from the input boxes
+        const otp =
+            document.getElementById('otp1').value +
+            document.getElementById('otp2').value +
+            document.getElementById('otp3').value +
+            document.getElementById('otp4').value +
+            document.getElementById('otp5').value +
+            document.getElementById('otp6').value;
 
-				try {
-					// Mock API call to fetch attendance status (replace with your actual API endpoint)
-					// const response = await fetch(`/api/attendance/status/${classId}?date=${date}&studentId=${studentId}`, {
-					//   headers: {
-					//     "Authorization": "Bearer your_token_here"
-					//   }
-					// });
+        if (otp.length !== 6) {
+            alert('Please enter a valid 6-digit OTP.');
+            return;
+        }
 
-					// Mock response for demonstration
-					const responseData = {
-						status: document.getElementById('statusSelect').value, // Use the selected status for demo
-					};
-					// const responseData = await response.json();
+        // Get the submit button
+        const submitButton = document.querySelector(
+            '#otpForm button[type="submit"]'
+        );
+        submitButton.disabled = true; // Disable the button
+        submitButton.textContent = 'Processing...'; // Change the button text
 
-					const className =
-						classes.find((cls) => cls.id === classId)?.name ||
-						'Unknown Class';
-					statusText.textContent = `Your attendance for ${className} on ${date}: ${
-						responseData.status.charAt(0).toUpperCase() +
-						responseData.status.slice(1)
-					}`;
-					statusCard.classList.remove('hidden');
-					statusCard.classList.add('fade-in');
-				} catch (error) {
-					console.error('Error fetching attendance status:', error);
-					statusText.textContent =
-						'Unable to fetch attendance status.';
-					statusCard.classList.remove('hidden');
-					statusCard.classList.add('fade-in');
-				}
-			}
+        try {
+            const response = await fetch('http://localhost:5000/api/auth/verify_otp', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 
+                    otp,
+                    admission_number: admissionNumberInput.value // Include admission number for verification
+                }),
+            });
+            console.log('OTP verification response:', response, admissionNumberInput.value);
 
-			// Function to show success/error messages
-			function showMessage(message, classes) {
-				const messageDiv = document.getElementById('message');
-				messageDiv.textContent = message;
-				messageDiv.className = `mt-4 p-3 rounded-lg text-center ${classes}`;
-				messageDiv.classList.remove('hidden');
+            if (!response.ok) {
+                throw new Error('OTP verification failed');
+            }
 
-				// Hide the message after 3 seconds
-				setTimeout(() => {
-					messageDiv.classList.add('hidden');
-				}, 3000);
-			}
-		</script>
-	</body>
+            const result = await response.json();
+            console.log(result)
+
+            if (response.ok) {
+                // Close the modal
+                const otpModal = bootstrap.Modal.getInstance(
+                    document.getElementById('otpVerificationModal')
+                );
+                otpModal.hide();
+               
+                localStorage.setItem('admission_number', admissionNumberInput.value);
+                
+                window.location.href = 'attendance.html'; // Redirect to the attendance page
+               
+            } else {
+                alert(`Error: ${result.message}`);
+            }
+        } catch (error) {
+            console.error('Error verifying OTP:', error);
+            alert('An error occurred while verifying the OTP.');
+        } finally {
+            // Re-enable the button and restore its text
+            submitButton.disabled = false;
+            submitButton.textContent = 'Verify OTP';
+        }
+    };
+
+
+
+
+    const moveToNext = (current, nextId) => {
+        if (current.value.length === 1 && nextId) {
+            document.getElementById(nextId).focus();
+        }
+    };
+
+    const moveToPrevious = (event, prevId) => {
+        if (
+            event.key === 'Backspace' &&
+            !event.target.value &&
+            prevId
+        ) {
+            document.getElementById(prevId).focus();
+        }
+    };
+    
+</script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
 </html>
