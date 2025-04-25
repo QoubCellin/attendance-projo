@@ -474,8 +474,6 @@
     admissionNumberInput.addEventListener('input', handleInputChange);
     passwordInput.addEventListener('input', handleInputChange);
 
-    // Handle form submission
-    // Handle form submission
     loginForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         
@@ -485,6 +483,13 @@
         
         // If all validations pass, proceed with login
         if (admissionNumberValid && passwordValid) {
+            // Get the login button and disable it
+            const loginButton = document.querySelector('.btn-login');
+            const originalButtonText = loginButton.textContent;
+            loginButton.textContent = 'Processing...';
+            loginButton.disabled = true;
+            loginButton.style.cursor = 'not-allowed';
+            
             try {
                 const response = await fetch('http://localhost:5000/api/auth/login', {
                     method: 'POST',
@@ -509,13 +514,17 @@
                 const otpModal = new bootstrap.Modal(document.getElementById('otpVerificationModal'));
                 otpModal.show();
 
-
             } catch (err) {
                 console.error('Login error:', err);
                 alert(err.message || 'An error occurred during login');
+                
+                // Re-enable the button and restore original text on error
+                loginButton.textContent = originalButtonText;
+                loginButton.disabled = false;
             }
         }
     });
+
 
 
     let debounceTimer;
