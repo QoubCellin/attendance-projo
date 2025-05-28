@@ -1,0 +1,792 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Lecturer Dashboard</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/daterangepicker@3.1.0/daterangepicker.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+    
+    :root {
+      --primary-blue: #1a3e8c;
+      --secondary-red: #e63946;
+      --light-gray: #f8f9fa;
+      --dark-gray: #343a40;
+    }
+    
+    body {
+      font-family: 'Poppins', sans-serif;
+      background-color: #f5f5f5;
+    }
+    
+    /* Sidebar Styles */
+    .sidebar {
+      height: 100vh;
+      background: white;
+      box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+      position: fixed;
+      width: 250px;
+      transition: all 0.3s;
+      z-index: 1000;
+    }
+    
+    .sidebar-header {
+      padding: 20px;
+      background: var(--primary-blue);
+      color: white;
+      display: flex;
+      align-items: center;
+    }
+    
+    .sidebar-header .university-logo {
+      width: 40px;
+      height: 40px;
+      background: var(--secondary-red);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      margin-right: 10px;
+    }
+    
+    .sidebar-menu {
+      padding: 20px 0;
+    }
+    
+    .sidebar-menu .nav-link {
+      color: var(--dark-gray);
+      padding: 12px 20px;
+      margin: 5px 0;
+      border-radius: 0;
+      display: flex;
+      align-items: center;
+      transition: all 0.3s;
+    }
+    
+    .sidebar-menu .nav-link:hover,
+    .sidebar-menu .nav-link.active {
+      background-color: rgba(26, 62, 140, 0.1);
+      color: var(--primary-blue);
+    }
+    
+    .sidebar-menu .nav-link i {
+      margin-right: 10px;
+      font-size: 1.1rem;
+    }
+    
+    /* Main Content Styles */
+    .main-content {
+      margin-left: 250px;
+      padding: 20px;
+      transition: all 0.3s;
+    }
+    
+    .header {
+      background: white;
+      padding: 15px 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    
+    .user-profile {
+      display: flex;
+      align-items: center;
+    }
+    
+    .user-profile img {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      margin-right: 10px;
+      object-fit: cover;
+    }
+    
+    /* Dashboard Cards */
+    .dashboard-card {
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+      padding: 20px;
+      margin-bottom: 20px;
+      transition: all 0.3s;
+    }
+    
+    .dashboard-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+    
+    .card-icon {
+      width: 50px;
+      height: 50px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 15px;
+    }
+    
+    .card-icon.blue {
+      background-color: rgba(26, 62, 140, 0.1);
+      color: var(--primary-blue);
+    }
+    
+    .card-icon.red {
+      background-color: rgba(230, 57, 70, 0.1);
+      color: var(--secondary-red);
+    }
+    
+    .card-icon.green {
+      background-color: rgba(40, 167, 69, 0.1);
+      color: #28a745;
+    }
+    
+    /* Attendance Table */
+    .attendance-table {
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+      padding: 20px;
+    }
+    
+    .attendance-table .table th {
+      border-top: none;
+      color: var(--primary-blue);
+    }
+    
+    .badge-present {
+      background-color: #d4edda;
+      color: #155724;
+    }
+    
+    .badge-absent {
+      background-color: #f8d7da;
+      color: #721c24;
+    }
+    
+    .badge-late {
+      background-color: #fff3cd;
+      color: #856404;
+    }
+    
+    /* Responsive Adjustments */
+    @media (max-width: 768px) {
+      .sidebar {
+        width: 0;
+        overflow: hidden;
+      }
+      
+      .main-content {
+        margin-left: 0;
+      }
+      
+      .sidebar.active {
+        width: 250px;
+      }
+    }
+
+    /* Content Sections */
+    .content-section {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <!-- Sidebar -->
+  <div class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="university-logo">U</div>
+      <h5 class="mb-0"> Dashboard</h5>
+    </div>
+    <div class="sidebar-menu">
+      <ul class="nav flex-column">
+        <li class="nav-item">
+          <a class="nav-link active" href="#" data-section="dashboard">
+            <i class="bi bi-speedometer2"></i> Dashboard
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#" data-section="students">
+            <i class="bi bi-people-fill"></i> Students
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#" data-section="attendance">
+            <i class="bi bi-calendar-check"></i> Attendance
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#" data-section="units">
+            <i class="bi bi-journal-text"></i> Units
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#" data-section="reports">
+            <i class="bi bi-file-earmark-bar-graph"></i> Reports
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#" data-section="settings">
+            <i class="bi bi-gear"></i> Settings
+          </a>
+        </li>
+        <li class="nav-item mt-4">
+          <a class="nav-link text-danger" href="login.html">
+            <i class="bi bi-box-arrow-right"></i> Logout
+          </a>
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="main-content" id="mainContent">
+    <!-- Dashboard Section -->
+    <div id="dashboard-section" class="content-section">
+      <div class="header">
+        <h4 class="mb-0">Dashboard Overview</h4>
+        <div class="user-profile">
+          <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="User">
+          <div>
+            <h6 class="mb-0" id="lecturerName">Dr. Abc</h6>
+            <small class="text-muted">Business Department</small>
+          </div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-md-4">
+          <div class="dashboard-card">
+            <div class="card-icon blue">
+              <i class="bi bi-people-fill"></i>
+            </div>
+            <h5>Students</h5>
+            <h2 class="mb-3">0</h2>
+            <p class="text-muted">Across all your units</p>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="dashboard-card">
+            <div class="card-icon red">
+              <i class="bi bi-book-half"></i>
+            </div>
+            <h5>Units</h5>
+            <h2 class="mb-3">0</h2>
+            <p class="text-muted">Currently teaching</p>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="dashboard-card">
+            <div class="card-icon green">
+              <i class="bi bi-calendar-check"></i>
+            </div>
+            <h5>Attendance</h5>
+            <h2 class="mb-3">0%</h2>
+            <p class="text-muted">Average this semester</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Students Section -->
+    <div id="students-section" class="content-section" style="display:none">
+      <div class="header">
+        <h4 class="mb-0">Student Management</h4>
+        <div class="user-profile">
+          <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="User">
+          <div>
+            <h6 class="mb-0" id="lecturerName">Dr. Abc</h6>
+            <small class="text-muted">Business Department</small>
+          </div>
+        </div>
+      </div>
+      
+      <div class="attendance-table">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+          <h5>Student List</h5>
+          <div>
+            <button class="btn btn-sm btn-outline-primary me-2">Export</button>
+            <button class="btn btn-sm btn-primary">Add Student</button>
+          </div>
+        </div>
+        <div class="table-responsive">
+          <table class="table table-hover">
+            <thead>
+              <tr>
+                <th>Student ID</th>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Program</th>
+                <th>Year</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>BUS-242-128/2022</td>
+                <td>Marcelo Masese</td>
+                <td>masese@university.edu</td>
+                <td>Business Information Tech</td>
+                <td>3</td>
+                <td>
+                  <button class="btn btn-sm btn-outline-primary">View</button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Attendance Section -->
+    <div id="attendance-section" class="content-section" style="display:none">
+      <div class="header">
+        <h4 class="mb-0">Attendance Records</h4>
+        <div class="user-profile">
+          <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="User">
+          <div>
+            <h6 class="mb-0" id="lecturerName">Dr. Abc</h6>
+            <small class="text-muted">Business Department</small>
+          </div>
+        </div>
+      </div>
+
+      <div class="attendance-table">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+          <h5>Recent Attendance Records</h5>
+          <button class="btn btn-sm btn-outline-primary">View All</button>
+        </div>
+        <div class="table-responsive">
+          <table class="table table-hover">
+            <thead>
+              <tr>
+                <th>Unit Code</th>
+                <th>Date</th>
+                <th>Class</th>
+                <th>Present</th>
+                <th>Absent</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>CIT-401</td>
+                <td>March 15, 2025</td>
+                <td>9:00 AM - 11:00 AM</td>
+                <td>32</td>
+                <td>5</td>
+                <td><span class="badge badge-present">Completed</span></td>
+              </tr>
+              <tr>
+                <td>CIT-310</td>
+                <td>March 14, 2025</td>
+                <td>2:00 PM - 4:00 PM</td>
+                <td>28</td>
+                <td>7</td>
+                <td><span class="badge badge-present">Completed</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Units Section -->
+    <div id="units-section" class="content-section" style="display:none">
+      <div class="header">
+        <h4 class="mb-0">Unit Management</h4>
+        <div class="user-profile">
+          <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="User">
+          <div>
+            <h6 class="mb-0" id="lecturerName">Dr. Abc</h6>
+            <small class="text-muted">Business Department</small>
+          </div>
+        </div>
+      </div>
+
+      <div class="attendance-table mt-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+          <h5>Upcoming Classes</h5>
+          <button class="btn btn-sm btn-outline-primary">View Calendar</button>
+        </div>
+        <div class="table-responsive">
+          <table class="table table-hover">
+            <thead>
+              <tr>
+                <th>Unit Code</th>
+                <th>Unit Name</th>
+                <th>Date & Time</th>
+                <th>Venue</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>CIT-401</td>
+                <td>Advanced Database Systems</td>
+                <td>Dec 17, 2024 • 9:00 AM - 11:00 AM</td>
+                <td>Computer Lab 3</td>
+                <td><button class="btn btn-sm btn-primary">Prepare Attendance</button></td>
+              </tr>
+              <tr>
+                <td>BUS-310</td>
+                <td>Software Engineering</td>
+                <td>Jan 18, 2025 • 2:00 PM - 4:00 PM</td>
+                <td>LT 4</td>
+                <td><button class="btn btn-sm btn-primary">Prepare Attendance</button></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Reports Section -->
+    <div id="reports-section" class="content-section" style="display:none">
+      <div class="header">
+        <h4 class="mb-0">Generate Reports</h4>
+        <div class="user-profile">
+          <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="User">
+          <div>
+            <h6 class="mb-0" id="lecturerName">Dr. Abc</h6>
+            <small class="text-muted">Business Department</small>
+          </div>
+        </div>
+      </div>
+      
+      <div class="row mt-4">
+        <div class="col-md-6">
+          <div class="dashboard-card">
+            <div class="card-icon blue">
+              <i class="bi bi-calendar-week"></i>
+            </div>
+            <h5>Attendance Report</h5>
+            <div class="mb-3">
+              <label for="attendance-unit" class="form-label">Select Unit</label>
+              <select class="form-select" id="attendance-unit">
+                <option value="">All Units</option>
+                <option value="CIT-101">CIT-101</option>
+                <option value="CIT-202">CIT-202</option>
+                <option value="CIT-305">CIT-305</option>
+              </select>
+            </div>
+            <div class="mb-3">
+              <label for="attendance-range" class="form-label">Date Range</label>
+              <input type="text" class="form-control" id="attendance-range" placeholder="Select date range">
+            </div>
+            <button class="btn btn-primary mt-3" onclick="generateReport('attendance')">
+              Generate Report
+            </button>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="dashboard-card">
+            <div class="card-icon green">
+              <i class="bi bi-graph-up"></i>
+            </div>
+            <h5>Performance Report</h5>
+            <div class="mb-3">
+              <label for="performance-unit" class="form-label">Select Unit</label>
+              <select class="form-select" id="performance-unit">
+                <option value="">All Units</option>
+                <option value="CIT-101">CIT-101</option>
+                <option value="CIT-202">CIT-202</option>
+                <option value="CIT-305">CIT-305</option>
+              </select>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Report Type</label>
+              <div class="form-check">
+                <input class="form-check-input" type="radio" name="reportType" id="summary" checked>
+                <label class="form-check-label" for="summary">Summary</label>
+              </div>
+              <div class="form-check">
+                <input class="form-check-input" type="radio" name="reportType" id="detailed">
+                <label class="form-check-label" for="detailed">Detailed</label>
+              </div>
+            </div>
+            <button class="btn btn-primary mt-3" onclick="generateReport('performance')">
+              Generate Report
+            </button>
+          </div>
+        </div>
+      </div>
+      
+      <div class="attendance-table mt-4">
+        <h5>Report History</h5>
+        <div class="table-responsive mt-3">
+          <table class="table table-hover">
+            <thead>
+              <tr>
+                <th>Report Type</th>
+                <th>Generated On</th>
+                <th>Parameters</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Attendance Summary</td>
+                <td>May 10, 2023</td>
+                <td>CIT-401 • Apr 1 - May 1</td>
+                <td><span class="badge bg-success">Completed</span></td>
+                <td>
+                  <button class="btn btn-sm btn-outline-primary me-2">View</button>
+                  <button class="btn btn-sm btn-outline-secondary">Download</button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Settings Section -->
+    <div id="settings-section" class="content-section" style="display:none">
+      <div class="header">
+        <h4 class="mb-0">Account Settings</h4>
+        <div class="user-profile">
+          <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="User">
+          <div>
+            <h6 class="mb-0" id="lecturerName">Dr. Abc</h6>
+            <small class="text-muted">Business Department</small>
+          </div>
+        </div>
+      </div>
+
+      <div class="attendance-table mt-4">
+        <div class="row">
+          <div class="col-md-6">
+            <div class="card">
+              <div class="card-body">
+                <h5 class="card-title">Change Password</h5>
+                <form id="passwordForm">
+                  <div class="mb-3">
+                    <label for="currentPassword" class="form-label">Current Password</label>
+                    <input type="password" class="form-control" id="currentPassword" required>
+                  </div>
+                  <div class="mb-3">
+                    <label for="newPassword" class="form-label">New Password</label>
+                    <input type="password" class="form-control" id="newPassword" required>
+                  </div>
+                  <div class="mb-3">
+                    <label for="confirmPassword" class="form-label">Confirm New Password</label>
+                    <input type="password" class="form-control" id="confirmPassword" required>
+                  </div>
+                  <button type="submit" class="btn btn-primary">Update Password</button>
+                </form>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="card">
+              <div class="card-body">
+                <h5 class="card-title">Profile Information</h5>
+                <form id="profileForm">
+                  <div class="mb-3">
+                    <label for="email" class="form-label">Email</label>
+                    <input type="email" class="form-control" id="email" value="lecturer@university.edu" required>
+                  </div>
+                  <div class="mb-3">
+                    <label for="department" class="form-label">Department</label>
+                    <input type="text" class="form-control" id="department" value="Business" required>
+                  </div>
+                  <button type="submit" class="btn btn-primary">Update Profile</button>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/moment@2.29.1/moment.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/daterangepicker@3.1.0/daterangepicker.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Initialize date range picker
+      $('#attendance-range').daterangepicker({
+        opens: 'left',
+        locale: {
+          format: 'MMM D, YYYY'
+        }
+      });
+
+      // Get lecturer name from session (simulated)
+      const lecturerName = localStorage.getItem('lecturerName') || 'Dr. Abc';
+      document.querySelectorAll('#lecturerName').forEach(el => {
+        el.textContent = lecturerName;
+      });
+
+      // Handle sidebar navigation
+      document.querySelectorAll('.sidebar-menu .nav-link').forEach(link => {
+        link.addEventListener('click', function(e) {
+          e.preventDefault();
+          
+          // Remove active class from all links
+          document.querySelectorAll('.sidebar-menu .nav-link').forEach(item => {
+            item.classList.remove('active');
+          });
+          
+          // Add active class to clicked link
+          this.classList.add('active');
+          
+          // Hide all content sections
+          document.querySelectorAll('.content-section').forEach(section => {
+            section.style.display = 'none';
+          });
+          
+          // Show the selected content section
+          const sectionId = this.getAttribute('data-section') + '-section';
+          document.getElementById(sectionId).style.display = 'block';
+        });
+      });
+
+      // Generate report function
+      window.generateReport = function(type) {
+        // Validate inputs
+        if (type === 'attendance') {
+          const dateRange = document.getElementById('attendance-range').value;
+          if (!dateRange) {
+            alert('Please select a date range');
+            return;
+          }
+        }
+
+        // Show loading state
+        const btn = event.target;
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Generating...';
+        btn.disabled = true;
+        
+        // Simulate API call for report generation
+        setTimeout(() => {
+          // Create report data
+          const reportData = {
+            type: type,
+            date: new Date().toLocaleString(),
+            parameters: {
+              unit: type === 'attendance' 
+                ? document.getElementById('attendance-unit').value || 'All Units'
+                : document.getElementById('performance-unit').value || 'All Units',
+              dateRange: type === 'attendance' 
+                ? document.getElementById('attendance-range').value 
+                : null,
+              reportType: type === 'performance'
+                ? document.querySelector('input[name="reportType"]:checked').value
+                : null
+            }
+          };
+
+          // Add to report history
+          addToReportHistory(reportData);
+          
+          // Restore button
+          btn.innerHTML = originalText;
+          btn.disabled = false;
+          
+          // Show success message
+          if (confirm(`${type.charAt(0).toUpperCase() + type.slice(1)} report generated successfully!\n\nWould you like to download it now?`)) {
+            downloadReport(reportData);
+          }
+        }, 2000);
+      };
+
+      // Add to report history table
+      function addToReportHistory(report) {
+        const table = document.querySelector('#reports-section table tbody');
+        const newRow = document.createElement('tr');
+        
+        let paramsText = '';
+        if (report.type === 'attendance') {
+          paramsText = `${report.parameters.unit} • ${report.parameters.dateRange}`;
+        } else {
+          paramsText = `${report.parameters.unit} • ${report.parameters.reportType}`;
+        }
+        
+        newRow.innerHTML = `
+          <td>${report.type.charAt(0).toUpperCase() + report.type.slice(1)} Report</td>
+          <td>${new Date().toLocaleDateString()}</td>
+          <td>${paramsText}</td>
+          <td><span class="badge bg-success">Completed</span></td>
+          <td>
+            <button class="btn btn-sm btn-outline-primary me-2" onclick="viewReport(this)">View</button>
+            <button class="btn btn-sm btn-outline-secondary" onclick="downloadReportFromHistory(this)">Download</button>
+          </td>
+        `;
+        
+        table.insertBefore(newRow, table.firstChild);
+      }
+
+      // Download report function
+      window.downloadReport = function(reportData) {
+        // In a real app, this would generate a PDF/Excel file
+        alert(`Downloading ${reportData.type} report for ${reportData.parameters.unit}`);
+      };
+
+      // View report from history
+      window.viewReport = function(btn) {
+        const row = btn.closest('tr');
+        const reportType = row.cells[0].textContent;
+        const params = row.cells[2].textContent;
+        alert(`Viewing ${reportType}\nParameters: ${params}`);
+      };
+
+      // Download report from history
+      window.downloadReportFromHistory = function(btn) {
+        const row = btn.closest('tr');
+        const reportType = row.cells[0].textContent;
+        alert(`Downloading ${reportType}`);
+      };
+
+      // Mobile sidebar toggle
+      window.toggleSidebar = function() {
+        document.getElementById('sidebar').classList.toggle('active');
+        document.getElementById('mainContent').classList.toggle('active');
+      };
+      
+      // Sample function to prepare attendance
+      window.prepareAttendance = function(unitCode) {
+        alert(`Preparing attendance for ${unitCode}`);
+      };
+      
+      // Add click handlers to all prepare attendance buttons
+      document.querySelectorAll('.btn-primary').forEach(btn => {
+        if (!btn.hasAttribute('data-processed') && btn.textContent.includes('Prepare')) {
+          btn.addEventListener('click', function() {
+            const unitCode = this.closest('tr').querySelector('td:first-child').textContent;
+            prepareAttendance(unitCode);
+          });
+          btn.setAttribute('data-processed', 'true');
+        }
+      });
+      
+      // Form submissions
+      document.getElementById('passwordForm')?.addEventListener('submit', function(e) {
+        e.preventDefault();
+        alert('Password updated successfully!');
+      });
+      
+      document.getElementById('profileForm')?.addEventListener('submit', function(e) {
+        e.preventDefault();
+        alert('Profile updated successfully!');
+      });
+      
+      // Initialize with dashboard shown
+      document.getElementById('dashboard-section').style.display = 'block';
+    });
+  </script>
+</body>
+</html>

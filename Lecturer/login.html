@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Lecturer Portal - Login</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+    
+    body {
+        font-family: 'Poppins', 'Times New Roman', Times, serif;
+        margin: 0;
+        padding: 0;
+        height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background: url('https://images.unsplash.com/photo-1523050854058-8df90110c9f1?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80') no-repeat center center;
+        background-size: cover;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    body::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(255, 255, 255, 0.85);
+        z-index: 0;
+    }
+    
+    .login-container {
+        width: 400px;
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+        overflow: hidden;
+        position: relative;
+        z-index: 1;
+        transform: translateY(0);
+        transition: transform 0.4s ease, box-shadow 0.4s ease;
+    }
+    
+    .login-container:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+    }
+    
+    .login-header {
+        background: #1a3e8c;
+        color: white;
+        padding: 28px;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .login-header h2 {
+        margin: 0;
+        font-size: 1.8rem;
+        font-weight: 600;
+        position: relative;
+        z-index: 1;
+    }
+    
+    .login-header::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: 4px;
+        background: #e63946;
+    }
+    
+    .login-content {
+        padding: 30px 40px;
+    }
+    
+    .form-group {
+        margin-bottom: 20px;
+        position: relative;
+    }
+    
+    .form-group label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 500;
+        color: #333;
+        font-size: 0.95rem;
+    }
+    
+    .form-control {
+        width: 100%;
+        padding: 12px 18px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        font-size: 0.95rem;
+        transition: all 0.3s;
+        box-sizing: border-box;
+        background: #f9f9f9;
+    }
+    
+    .form-control:focus {
+        border-color: #1a3e8c;
+        box-shadow: 0 0 0 3px rgba(26, 62, 140, 0.1);
+        outline: none;
+        background: white;
+    }
+    
+    .btn-login {
+        width: 100%;
+        padding: 14px;
+        background: #1a3e8c;
+        border: none;
+        border-radius: 8px;
+        color: white;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s;
+        margin-top: 10px;
+    }
+    
+    .btn-login:hover {
+        background: #0d2b66;
+    }
+    
+    .login-footer {
+        text-align: center;
+        padding: 20px;
+        border-top: 1px solid #eee;
+        font-size: 0.9rem;
+        color: #666;
+    }
+    
+    .login-footer a {
+        color: #1a3e8c;
+        text-decoration: none;
+        font-weight: 500;
+        transition: color 0.3s;
+    }
+    
+    .login-footer a:hover {
+        color: #e63946;
+    }
+    
+    .university-logo {
+        position: absolute;
+        top: 20px;
+        left: 20px;
+        width: 40px;
+        height: 40px;
+        background: #e63946;
+        border-radius: 60%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: bold;
+        font-size: 1.2rem;
+    }
+    
+    .error-message {
+        color: #e63946;
+        font-size: 0.8rem;
+        margin-top: 5px;
+        display: block;
+    }
+
+    .form-control.is-invalid {
+        border-color: #e63946;
+    }
+
+    .form-control.is-valid {
+        border-color: #28a745;
+    }
+    
+    .forgot-password {
+        text-align: right;
+        margin-top: -15px;
+        margin-bottom: 15px;
+    }
+    
+    .forgot-password a {
+        color: #6c757d;
+        font-size: 0.85rem;
+        text-decoration: none;
+    }
+    
+    .forgot-password a:hover {
+        color: #1a3e8c;
+    }
+  </style>
+</head>
+<body>
+<div class="login-container">
+    <div class="university-logo">U</div>
+    <div class="login-header">
+        <h2>Lecturer Login</h2>
+    </div>
+    <div class="login-content">
+        <form id="loginForm">
+            <div class="form-group">
+                <label for="staff_id">Staff ID</label>
+                <input type="text" name="staff_id" id="staff_id" class="form-control" placeholder="Enter your staff ID">
+                <span id="staff_id_error" class="error-message"></span>
+            </div>
+            
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" name="password" id="password" class="form-control" placeholder="Enter your password">
+                <span id="password_error" class="error-message"></span>
+                <div class="forgot-password">
+                    <a href="forgot_password.html">Forgot Password?</a>
+                </div>
+            </div>
+            
+            <button type="submit" class="btn-login">Login</button>
+        </form>
+    </div>
+    <div class="login-footer">
+        <p>Don't have an account? <a href="index.html">Register here</a></p>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const loginForm = document.getElementById('loginForm');
+        
+        // Validation rules
+        const validations = {
+            staff_id: {
+                required: true,
+                pattern: /^[A-Z]{3}-\d{4}[A-Z]?$/,
+                messages: {
+                    required: "Staff ID is required",
+                    pattern: "Staff ID format: LEC-1234A"
+                }
+            },
+            password: {
+                required: true,
+                messages: {
+                    required: "Password is required"
+                }
+            }
+        };
+        
+        // Validate a single field
+        function validateField(field, value) {
+            const rules = validations[field];
+            const errorElement = document.getElementById(`${field}_error`);
+            const inputElement = document.getElementById(field);
+            
+            // Reset validation state
+            errorElement.textContent = '';
+            inputElement.classList.remove('is-invalid', 'is-valid');
+            
+            // Check required
+            if (rules.required && !value) {
+                errorElement.textContent = rules.messages.required;
+                inputElement.classList.add('is-invalid');
+                return false;
+            }
+            
+            // Check pattern if exists
+            if (rules.pattern && !rules.pattern.test(value)) {
+                errorElement.textContent = rules.messages.pattern;
+                inputElement.classList.add('is-invalid');
+                return false;
+            }
+            
+            inputElement.classList.add('is-valid');
+            return true;
+        }
+        
+        // Handle input changes for real-time validation
+        function handleInputChange(e) {
+            const { name, value } = e.target;
+            validateField(name, value);
+        }
+        
+        // Add input event listeners for real-time validation
+        document.getElementById('staff_id').addEventListener('input', handleInputChange);
+        document.getElementById('password').addEventListener('input', handleInputChange);
+        
+        // Form submission
+        loginForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            // Validate all fields
+            let formValid = true;
+            formValid &= validateField('staff_id', document.getElementById('staff_id').value);
+            formValid &= validateField('password', document.getElementById('password').value);
+            
+            if (formValid) {
+                // Get the submit button and disable it
+                const submitButton = loginForm.querySelector('button[type="submit"]');
+                const originalButtonText = submitButton.textContent;
+                submitButton.textContent = 'Logging in...';
+                submitButton.disabled = true;
+                submitButton.style.cursor = 'not-allowed';
+                
+                try {
+                    // Simulate API call (replace with actual fetch)
+                    console.log('Login data:', {
+                        staff_id: document.getElementById('staff_id').value,
+                        password: document.getElementById('password').value
+                    });
+                    
+                    // Simulate successful login
+                    setTimeout(() => {
+                        // Redirect to dashboard or show success
+                        window.location.href = 'dashboard.html';
+                        
+                        // Or show error if login fails
+                        // document.getElementById('password_error').textContent = "Invalid credentials";
+                        // submitButton.textContent = originalButtonText;
+                        // submitButton.disabled = false;
+                    }, 1500);
+                    
+                } catch (error) {
+                    console.error('Login error:', error);
+                    document.getElementById('password_error').textContent = "Login failed. Please try again.";
+                    submitButton.textContent = originalButtonText;
+                    submitButton.disabled = false;
+                }
+            }
+        });
+    });
+</script>
+</body>
+</html>

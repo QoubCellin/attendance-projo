@@ -5,14 +5,37 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Student Dashboard</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <style>
+        .attendance-status { transition: opacity 0.3s ease; }
+        .websocket-status {
+            position: fixed;
+            bottom: 10px;
+            right: 10px;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 0.9em;
+            z-index: 1000;
+        }
+        .websocket-connected { background-color: #d4edda; color: #155724; }
+        .websocket-disconnected { background-color: #f8d7da; color: #721c24; }
+        .session-timer { font-weight: 500; color: #1a3e8c; }
+    </style>
 </head>
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
         <div class="container">
-            <a class="navbar-brand" href="#">Attendance System</a>
+            <a class="navbar-brand" href="#">
+                <i class="bi bi-calendar-check me-2"></i>Attendance System
+            </a>
             <div class="navbar-nav ms-auto">
-                <span class="navbar-text me-3" id="userName"></span>
-                <button class="btn btn-outline-light" id="logoutBtn">Logout</button>
+                <span class="navbar-text me-3">
+                    <i class="bi bi-person-circle me-1"></i>
+                    <span id="studentName">Loading...</span>
+                </span>
+                <button class="btn btn-outline-light" id="logoutBtn">
+                    <i class="bi bi-box-arrow-right me-1"></i>Logout
+                </button>
             </div>
         </div>
     </nav>
@@ -21,38 +44,58 @@
         <div class="row">
             <div class="col-md-6">
                 <div class="card mb-4">
-                    <div class="card-header">
-                        <h5>Submit Attendance</h5>
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">
+                            <i class="bi bi-send-check me-2"></i>Attendance Session
+                        </h5>
                     </div>
                     <div class="card-body">
-                        <form id="attendanceForm">
-                            <div class="mb-3">
-                                <label for="sessionCode" class="form-label">Session Code</label>
-                                <input type="text" class="form-control" id="sessionCode" required>
-                            </div>
-                            <button type="submit" class="btn btn-primary">Submit</button>
-                        </form>
+                        <div id="noSessionAlert" class="alert alert-warning">
+                            No active attendance sessions currently.
+                        </div>
+                        <div class="attendance-form">
+                            <input type="text" id="sessionCode" placeholder="Enter Session Code">
+                            <input type="text" id="studentId" placeholder="Your Student ID">
+                            <input type="text" id="studentName" placeholder="Your Name">
+                            <button id="joinSession">Join Session</button>
+                            <div id="attendanceStatus"></div>
+                        </div>
+                        <div id="activeSession" style="display: none;">
+                            <h5><span id="sessionUnitCode"></span></h5>
+                            <p>Session Code: <strong id="sessionCodeDisplay"></strong></p>
+                            <p>Time Remaining: <span id="sessionTimer" class="session-timer"></span></p>
+                            <button id="markAttendanceBtn" class="btn btn-success w-100">
+                                <span class="submit-text">Mark Attendance</span>
+                                <span class="spinner-border spinner-border-sm" style="display: none;"></span>
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
             
             <div class="col-md-6">
                 <div class="card">
-                    <div class="card-header">
-                        <h5>Your Attendance Summary</h5>
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">
+                            <i class="bi bi-clock-history me-2"></i>Attendance History
+                        </h5>
                     </div>
                     <div class="card-body">
                         <div class="table-responsive">
-                            <table class="table table-striped">
+                            <table class="table table-hover">
                                 <thead>
                                     <tr>
                                         <th>Course</th>
-                                        <th>Date</th>
+                                        <th>Date/Time</th>
                                         <th>Status</th>
                                     </tr>
                                 </thead>
-                                <tbody id="attendanceTable">
-                                    <!-- Attendance records will be loaded here -->
+                                <tbody id="attendanceHistory">
+                                    <tr>
+                                        <td colspan="3" class="text-center text-muted py-4">
+                                            Loading attendance records...
+                                        </td>
+                                    </tr>
                                 </tbody>
                             </table>
                         </div>
@@ -62,86 +105,291 @@
         </div>
     </div>
 
+    <div id="websocketStatus" class="websocket-status"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // Check authentication
-        const token = localStorage.getItem('token');
-        const user = JSON.parse(localStorage.getItem('user'));
-        
-        if (!token || !user || user.role !== 'student') {
-            window.location.href = 'login.html';
-        }
-        
-        document.getElementById('userName').textContent = user.full_name;
-        
-        // Load attendance records
-        async function loadAttendance() {
-            try {
-                const response = await fetch('/api/attendance', {
-                    headers: {
-                        'Authorization': `Bearer ${token}`
+        class StudentDashboard {
+            constructor() {
+                this.socket = null;
+                this.currentSession = null;
+                this.student = null;
+                this.animationFrameId = null;
+                this.retryCount = 0;
+                this.maxRetries = 5;
+                
+                this.initialize();
+            }
+
+            async initialize() {
+                await this.verifySession();
+                this.cacheElements();
+                this.setupEventListeners();
+                this.connectWebSocket();
+                this.loadAttendanceHistory();
+                this.updateUI();
+            }
+
+            async verifySession() {
+                try {
+                    const response = await fetch('/api/auth/verify-session', {
+                        credentials: 'include'
+                    });
+                    
+                    if (!response.ok) {
+                        window.location.href = '/login.html';
+                        return;
                     }
-                });
+                    
+                    const data = await response.json();
+                    this.student = data.user;
+                } catch (error) {
+                    console.error('Session verification failed:', error);
+                    window.location.href = '/login.html';
+                }
+            }
+
+            cacheElements() {
+                this.elements = {
+                    studentName: document.getElementById('studentName'),
+                    noSessionAlert: document.getElementById('noSessionAlert'),
+                    activeSession: document.getElementById('activeSession'),
+                    sessionUnitCode: document.getElementById('sessionUnitCode'),
+                    sessionCodeDisplay: document.getElementById('sessionCodeDisplay'),
+                    sessionTimer: document.getElementById('sessionTimer'),
+                    markAttendanceBtn: document.getElementById('markAttendanceBtn'),
+                    attendanceHistory: document.getElementById('attendanceHistory'),
+                    websocketStatus: document.getElementById('websocketStatus')
+                };
+            }
+
+            setupEventListeners() {
+                this.elements.markAttendanceBtn.addEventListener('click', () => this.markAttendance());
+                document.getElementById('logoutBtn').addEventListener('click', () => this.logout());
+            }
+
+            connectWebSocket() {
+                const protocol = window.location.protocol === 'https:' ? 'wss://' : 'ws://';
+                this.socket = new WebSocket(`${protocol}${window.location.host}/attendance?token=${this.getSessionToken()}`);
+
+                this.socket.onopen = () => {
+                    this.retryCount = 0;
+                    this.updateConnectionStatus(true);
+                };
+
+                this.socket.onmessage = (event) => this.handleSocketMessage(event);
+                this.socket.onclose = (event) => {
+                    this.updateConnectionStatus(false);
+                    if (this.retryCount < this.maxRetries) {
+                        setTimeout(() => this.connectWebSocket(), Math.min(5000, 1000 * (2 ** this.retryCount)));
+                        this.retryCount++;
+                    }
+                };
+
+                this.socket.onerror = (error) => {
+                    console.error('WebSocket error:', error);
+                    this.showFeedback('Connection error. Please refresh the page.', 'danger');
+                };
+            }
+
+            getSessionToken() {
+                return document.cookie
+                    .split('; ')
+                    .find(row => row.startsWith('session='))
+                    ?.split('=')[1];
+            }
+
+            handleSocketMessage(event) {
+                try {
+                    const data = JSON.parse(event.data);
+                    switch(data.type) {
+                        case 'session_update':
+                            this.handleSessionUpdate(data.payload);
+                            break;
+                        case 'attendance_confirmation':
+                            this.handleAttendanceConfirmation(data);
+                            break;
+                        case 'session_ended':
+                            this.handleSessionEnd();
+                            break;
+                    }
+                } catch (error) {
+                    console.error('Error processing WebSocket message:', error);
+                }
+            }
+
+            handleSessionUpdate(session) {
+                this.currentSession = session;
+                this.startSessionTimer();
+                this.updateUI();
+            }
+
+            handleSessionEnd() {
+                cancelAnimationFrame(this.animationFrameId);
+                this.currentSession = null;
+                this.updateUI();
+                this.showFeedback('Attendance session has ended', 'info');
+            }
+
+            handleAttendanceConfirmation(data) {
+                this.toggleLoading(false);
+                if (data.success) {
+                    this.showFeedback('Attendance recorded successfully!', 'success');
+                    this.loadAttendanceHistory();
+                } else {
+                    this.showFeedback(data.message || 'Error recording attendance', 'danger');
+                }
+            }
+
+            startSessionTimer() {
+                const updateTimer = () => {
+                    if (!this.currentSession) return;
+                    
+                    const now = Date.now();
+                    const endTime = new Date(this.currentSession.endTime).getTime();
+                    const remaining = endTime - now;
+
+                    if (remaining <= 0) {
+                        this.handleSessionEnd();
+                        return;
+                    }
+
+                    const minutes = Math.floor(remaining / 60000);
+                    const seconds = Math.floor((remaining % 60000) / 1000);
+                    this.elements.sessionTimer.textContent = 
+                        `${minutes}:${seconds.toString().padStart(2, '0')}`;
+                    
+                    this.animationFrameId = requestAnimationFrame(updateTimer);
+                };
                 
-                const records = await response.json();
+                updateTimer();
+            }
+
+            async markAttendance() {
+                if (!this.currentSession) return;
                 
-                const tableBody = document.getElementById('attendanceTable');
-                tableBody.innerHTML = '';
+                this.toggleLoading(true);
+                try {
+                    this.socket.send(JSON.stringify({
+                        type: 'mark_attendance',
+                        sessionCode: this.currentSession.code,
+                        studentId: this.student.id,
+                        csrfToken: this.getCsrfToken()
+                    }));
+                } catch (error) {
+                    this.toggleLoading(false);
+                    this.showFeedback('Failed to send attendance request', 'danger');
+                }
+            }
+
+            async loadAttendanceHistory() {
+                try {
+                    const response = await fetch('/api/attendance/history', {
+                        headers: {
+                            'Authorization': `Bearer ${this.getSessionToken()}`,
+                            'X-CSRF-Token': this.getCsrfToken()
+                        }
+                    });
+                    
+                    if (!response.ok) throw new Error('Failed to load history');
+                    
+                    const data = await response.json();
+                    this.renderAttendanceHistory(data);
+                } catch (error) {
+                    this.showFeedback('Failed to load attendance history', 'danger');
+                    console.error('Error loading attendance history:', error);
+                }
+            }
+
+            renderAttendanceHistory(records) {
+                this.elements.attendanceHistory.innerHTML = records.length > 0 
+                    ? records.map(record => `
+                        <tr>
+                            <td>${record.courseCode}<br>
+                                <small class="text-muted">${record.courseName}</small>
+                            </td>
+                            <td>${new Date(record.timestamp).toLocaleString()}</td>
+                            <td class="text-${this.getStatusColor(record.status)}">
+                                <i class="bi ${this.getStatusIcon(record.status)} me-1"></i>
+                                ${record.status}
+                            </td>
+                        </tr>
+                    `).join('')
+                    : `<tr><td colspan="3" class="text-center text-muted">No attendance records found</td></tr>`;
+            }
+
+            getStatusColor(status) {
+                return {
+                    Present: 'success',
+                    Late: 'warning',
+                    Absent: 'danger'
+                }[status] || 'secondary';
+            }
+
+            getStatusIcon(status) {
+                return {
+                    Present: 'bi-check-circle-fill',
+                    Late: 'bi-clock-fill',
+                    Absent: 'bi-x-circle-fill'
+                }[status] || 'bi-question-circle';
+            }
+
+            updateUI() {
+                this.elements.studentName.textContent = this.student?.name || 'Unknown User';
                 
-                records.forEach(record => {
-                    const row = document.createElement('tr');
-                    row.innerHTML = `
-                        <td>${record.course_code} - ${record.course_name}</td>
-                        <td>${new Date(record.session_date).toLocaleDateString()} ${record.start_time}</td>
-                        <td>${record.status}</td>
-                    `;
-                    tableBody.appendChild(row);
-                });
-            } catch (err) {
-                console.error(err);
-                alert('Failed to load attendance records');
+                if (this.currentSession) {
+                    this.elements.noSessionAlert.style.display = 'none';
+                    this.elements.activeSession.style.display = 'block';
+                    this.elements.sessionUnitCode.textContent = this.currentSession.unitName;
+                    this.elements.sessionCodeDisplay.textContent = this.currentSession.code;
+                } else {
+                    this.elements.noSessionAlert.style.display = 'block';
+                    this.elements.activeSession.style.display = 'none';
+                }
+            }
+
+            toggleLoading(loading) {
+                const btn = this.elements.markAttendanceBtn;
+                btn.disabled = loading;
+                btn.querySelector('.submit-text').style.display = loading ? 'none' : 'inline';
+                btn.querySelector('.spinner-border').style.display = loading ? 'inline' : 'none';
+            }
+
+            showFeedback(message, type) {
+                const existingAlert = this.elements.activeSession.querySelector('.alert');
+                if (existingAlert) existingAlert.remove();
+
+                const alert = document.createElement('div');
+                alert.className = `alert alert-${type} alert-dismissible fade show mt-3`;
+                alert.innerHTML = `
+                    ${message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                `;
+                this.elements.activeSession.appendChild(alert);
+            }
+
+            updateConnectionStatus(connected) {
+                this.elements.websocketStatus.className = `websocket-status ${connected ? 'websocket-connected' : 'websocket-disconnected'}`;
+                this.elements.websocketStatus.innerHTML = `
+                    ${connected ? '<i class="bi bi-check-circle me-1"></i>' : '<i class="bi bi-x-circle me-1"></i>'}
+                    ${connected ? 'Connected' : 'Disconnected - Reconnecting...'}
+                `;
+            }
+
+            getCsrfToken() {
+                return document.querySelector('meta[name="csrf-token"]')?.content || '';
+            }
+
+            logout() {
+                document.cookie = 'session=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+                window.location.href = '/login.html';
             }
         }
-        
-        // Submit attendance
-        document.getElementById('attendanceForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            const sessionCode = document.getElementById('sessionCode').value;
-            
-            try {
-                const response = await fetch('/api/attendance', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
-                    },
-                    body: JSON.stringify({ session_code: sessionCode })
-                });
-                
-                const data = await response.json();
-                
-                if (response.ok) {
-                    alert('Attendance recorded successfully!');
-                    document.getElementById('sessionCode').value = '';
-                    loadAttendance();
-                } else {
-                    alert(data.message || 'Failed to record attendance');
-                }
-            } catch (err) {
-                console.error(err);
-                alert('An error occurred');
-            }
+
+        // Initialize the dashboard after verifying session
+        document.addEventListener('DOMContentLoaded', () => {
+            new StudentDashboard();
         });
-        
-        // Logout
-        document.getElementById('logoutBtn').addEventListener('click', () => {
-            localStorage.removeItem('token');
-            localStorage.removeItem('user');
-            window.location.href = 'login.html';
-        });
-        
-        // Initial load
-        loadAttendance();
     </script>
 </body>
 </html>

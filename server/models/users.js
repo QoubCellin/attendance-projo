@@ -1,50 +1,26 @@
-const { Schema, model } = require('mongoose');
+const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
 
-const UserSchema = new Schema({
-	admission_number: {
-		type: String,
-		unique: true,
-	},
-	email: {
-		type: String,
-		unique: true,
-	},
-	otp: {
-		type: String,
-		default: null,
-	},
-	user_role: {
-		type: String,
-		enum: ['student', 'lecturer', 'admin'],
-		default: 'student',
-	},
-	password: {
-		type: String,
-		required: true,
-	},
+const studentSchema = new mongoose.Schema({
+    admission_number: { type: String, required: true, unique: true },
+    full_name: { type: String, required: true },
+    email: { type: String, required: true, unique: true },
+    course: { type: String, required: true },
+    enrollment_year: { type: Number, required: true },
+    status: { type: String, enum: ['active', 'graduated', 'suspended'], default: 'active' },
+    password: { type: String, required: true },
+    otp: {
+        code: { type: String },
+        expires: { type: Number }
+    },
+    sessions: [String]
+}, { timestamps: true });
+
+// Hash password before saving
+studentSchema.pre('save', async function (next) {
+    if (!this.isModified('password')) return next();
+    this.password = await bcrypt.hash(this.password, 10);
+    next();
 });
 
-// Hash the password before saving
-UserSchema.pre('save', async function (next) {
-	if (!this.isModified('password')) return next();
-
-	const salt = await bcrypt.genSalt(10);
-	this.password = await bcrypt.hash(this.password, salt);
-	next();
-});
-
-UserSchema.statics.login = async function (admission_number, password) {
-	try {
-		const user = await this.findOne({ admission_number });
-
-		if (user && bcrypt.compareSync(password, user.password)) {
-			return user;
-		}
-		throw new Error('Incorrect credentials');
-	} catch (error) {
-		throw error;
-	}
-};
-
-module.exports = model('User', UserSchema);
+module.exports = mongoose.model('Student', studentSchema);

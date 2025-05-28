@@ -266,7 +266,7 @@
         </form>
     </div>
     <div class="login-footer">
-        <p>Alrady have an account? <a href="login.html">Sign in</a></p>
+        <p>Alrady have an account? <a href="login.html">Log in</a></p>
     </div>
 </div>
 
@@ -282,7 +282,7 @@
     const currentYear = new Date().getFullYear();
     
     // List of valid faculties
-    const validFaculties = ['CIT', 'BUS', 'MCS', 'SCT', 'SST', 'ENG'];
+    const validFaculties = ['CIT', 'BUS', 'MCS', 'SCT', 'SST', 'ENG',];
 
     // Validation rules
     const validations = {
@@ -393,7 +393,7 @@
         // If all validations pass, proceed with login
         if (admissionNumberValid && passwordValid) {
             try {
-                const response = await fetch('http://localhost:5000/api/auth/register', {
+                const response = await fetch('http://localhost:3000/api/users/register', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -404,13 +404,13 @@
                         email: emailInput.value
                     })
                 });
-
+                
                 if (!response.ok) {
                     const errorData = await response.text();
                     throw new Error(errorData || 'Login failed');
                 }
 
-                window.location.href = 'index.html';
+                window.location.href = 'login.html';
 
                 const data = await response.json();
                 console.log('Signup successful:', data);

@@ -1,4 +1,4 @@
-const { Router } = require('express');
+const express = require('express');
 const {
 	signup,
 	signin,
@@ -6,7 +6,7 @@ const {
 	authenticate,
 	checkAdmission,
 } = require('../controllers/users');
-const router = new Router();
+const router = express.Router();
 
 router.post('/register', signup);
 router.post('/login', signin);
