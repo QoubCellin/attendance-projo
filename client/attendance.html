@@ -1,374 +1,353 @@
 <!DOCTYPE html>
 <html lang="en">
-	<head>
-		<meta charset="UTF-8" />
-		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<title>Student Attendance</title>
-		<!-- Tailwind CSS CDN -->
-		<script src="https://cdn.tailwindcss.com"></script>
-		<style>
-			/* Fade-in animation for the status card */
-			@keyframes fadeIn {
-				from {
-					opacity: 0;
-					transform: translateY(10px);
-				}
-				to {
-					opacity: 1;
-					transform: translateY(0);
-				}
-			}
-			.fade-in {
-				animation: fadeIn 0.5s ease-in-out;
-			}
-			/* Spinner animation */
-			.spinner {
-				border: 4px solid rgba(0, 0, 0, 0.1);
-				border-left-color: #4caf50;
-				border-radius: 50%;
-				width: 24px;
-				height: 24px;
-				animation: spin 1s linear infinite;
-				display: inline-block;
-			}
-			@keyframes spin {
-				to {
-					transform: rotate(360deg);
-				}
-			}
-		</style>
-	</head>
-	<body
-		class="min-h-screen bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center p-4"
-	>
-		<div
-			class="container max-w-4xl w-full bg-white rounded-xl shadow-lg p-6"
-		>
-			<h1
-				class="text-2xl font-bold text-gray-800 text-center mb-6 flex items-center justify-center"
-			>
-				<svg
-					class="w-6 h-6 mr-2 text-green-500"
-					fill="none"
-					stroke="currentColor"
-					viewBox="0 0 24 24"
-					xmlns="http://www.w3.org/2000/svg"
-				>
-					<path
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						stroke-width="2"
-						d="M5 13l4 4L19 7"
-					></path>
-				</svg>
-				Mark Your Attendance
-			</h1>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Student Attendance</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      /* Fade-in animation for the status card */
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      .fade-in {
+        animation: fadeIn 0.5s ease-in-out;
+      }
+      /* Spinner animation */
+      .spinner {
+        border: 4px solid rgba(0, 0, 0, 0.1);
+        border-left-color: #4caf50;
+        border-radius: 50%;
+        width: 24px;
+        height: 24px;
+        animation: spin 1s linear infinite;
+        display: inline-block;
+      }
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+    </style>
+  </head>
+  <body
+    class="min-h-screen bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center p-4"
+  >
+    <div class="container max-w-4xl w-full bg-white rounded-xl shadow-lg p-6">
+      <h1
+        class="text-2xl font-bold text-gray-800 text-center mb-6 flex items-center justify-center"
+      >
+        <svg
+          class="w-6 h-6 mr-2 text-green-500"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M5 13l4 4L19 7"
+          ></path>
+        </svg>
+        Mark Your Attendance
+      </h1>
 
-			<div class="flex flex-col md:flex-row gap-6">
-				<!-- Form to mark attendance -->
-				<form id="attendanceForm" class="space-y-4 w-full md:w-1/2">
-					<div>
-						<label
-							for="classSelect"
-							class="block text-sm font-medium text-gray-700 mb-1"
-							>Select Class</label
-						>
-						<select
-							id="classSelect"
-							class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition"
-						>
-							<option value="">-- Select a Class --</option>
-							<option value="class_1">Maths for Science</option>
-							<option value="class_2">Distributed Systems</option>
-							<option value="class_3">Accounting</option>
-							<option value="class_4">Procurement</option>
-							<option value="class_5">
-								Introduction to Programming
-							</option>
-							<option value="class_6">Operations Research</option>
-							<option value="class_7">
-								Research Methodology
-							</option>
-						</select>
-					</div>
-					<div>
-						<label
-							for="dateSelect"
-							class="block text-sm font-medium text-gray-700 mb-1"
-							>Select Date</label
-						>
-						<input
-							type="date"
-							id="dateSelect"
-							class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition"
-							value="2025-04-24"
-						/>
-					</div>
-					<div>
-						<label
-							for="statusSelect"
-							class="block text-sm font-medium text-gray-700 mb-1"
-							>Attendance Status</label
-						>
-						<select
-							id="statusSelect"
-							class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition"
-						>
-							<option value="present">Present</option>
-							<option value="excused">Excused</option>
-						</select>
-					</div>
-					<button
-						id="markButton"
-						type="submit"
-						class="w-full bg-green-500 text-white p-3 rounded-lg hover:bg-green-600 transition flex items-center justify-center"
-					>
-						<svg
-							class="w-5 h-5 mr-2"
-							fill="none"
-							stroke="currentColor"
-							viewBox="0 0 24 24"
-							xmlns="http://www.w3.org/2000/svg"
-						>
-							<path
-								stroke-linecap="round"
-								stroke-linejoin="round"
-								stroke-width="2"
-								d="M12 4v16m8-8H4"
-							></path>
-						</svg>
-						Mark Attendance
-					</button>
-				</form>
+      <div class="flex flex-col md:flex-row gap-6">
+        <!-- Form to mark attendance -->
+        <form id="attendanceForm" class="space-y-4 w-full md:w-1/2">
+          <div>
+            <label
+              for="classSelect"
+              class="block text-sm font-medium text-gray-700 mb-1"
+              >Select Class</label
+            >
+            <select
+              id="classSelect"
+              class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition"
+            >
+              <option value="">-- Select a Class --</option>
+              <option value="class_1">Maths for Science</option>
+              <option value="class_2">Distributed Systems</option>
+              <option value="class_3">Accounting</option>
+              <option value="class_4">Procurement</option>
+              <option value="class_5">Introduction to Programming</option>
+              <option value="class_6">Operations Research</option>
+              <option value="class_7">Research Methodology</option>
+            </select>
+          </div>
+          <div>
+            <label
+              for="dateSelect"
+              class="block text-sm font-medium text-gray-700 mb-1"
+              >Select Date</label
+            >
+            <input
+              type="date"
+              id="dateSelect"
+              class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition"
+              value="2025-04-24"
+            />
+          </div>
+          <div>
+            <label
+              for="statusSelect"
+              class="block text-sm font-medium text-gray-700 mb-1"
+              >Attendance Status</label
+            >
+            <select
+              id="statusSelect"
+              class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition"
+            >
+              <option value="present">Present</option>
+              <option value="excused">Excused</option>
+            </select>
+          </div>
+          <button
+            id="markButton"
+            type="submit"
+            class="w-full bg-green-500 text-white p-3 rounded-lg hover:bg-green-600 transition flex items-center justify-center"
+          >
+            <svg
+              class="w-5 h-5 mr-2"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M12 4v16m8-8H4"
+              ></path>
+            </svg>
+            Mark Attendance
+          </button>
+        </form>
 
-				<div
-					id="noAttendnace"
-					class="font-bold text-2xl text-gray-400 mt-[10%] ml-8"
-				>
-					<h2>No attendance marked</h2>
-				</div>
+        <div
+          id="noAttendnace"
+          class="font-bold text-2xl text-gray-400 mt-[10%] ml-8"
+        >
+          <h2>No attendance marked</h2>
+        </div>
 
-				<!-- Attendance history display -->
-				<div
-					id="attendanceHistory"
-					class="w-full md:w-1/2 p-4 bg-gray-50 rounded-lg border border-gray-200 hidden fade-in"
-				>
-					<h2 class="text-lg font-semibold text-gray-800 mb-2">
-						Marked Attendance
-					</h2>
-					<ul
-						id="attendanceList"
-						class="text-gray-600 space-y-2"
-					></ul>
-				</div>
-			</div>
+        <!-- Attendance history display -->
+        <div
+          id="attendanceHistory"
+          class="w-full md:w-1/2 p-4 bg-gray-50 rounded-lg border border-gray-200 hidden fade-in"
+        >
+          <h2 class="text-lg font-semibold text-gray-800 mb-2">
+            Marked Attendance
+          </h2>
+          <ul id="attendanceList" class="text-gray-600 space-y-2"></ul>
+        </div>
+      </div>
 
-			<!-- Message display -->
-			<div
-				id="message"
-				class="mt-4 p-3 rounded-lg text-center hidden"
-			></div>
-		</div>
+      <!-- Message display -->
+      <div id="message" class="mt-4 p-3 rounded-lg text-center hidden"></div>
+    </div>
 
-		<script>
-			// Mock student ID (in a real app, this would come from authentication)
-			const studentId = 'student_123';
+    <script>
+      // Mock student ID (in a real app, this would come from authentication)
+      const studentId = 'student_123';
 
-			// Mock list of classes (in a real app, this would be fetched from the backend)
-			const classes = [
-				{ id: 'class_1', name: 'Maths for Science' },
-				{ id: 'class_2', name: 'Distributed Systems' },
-				{ id: 'class_3', name: 'Accounting' },
-				{ id: 'class_4', name: 'Procurement' },
-				{ id: 'class_5', name: 'Introduction to Programming' },
-				{ id: 'class_6', name: 'Operations Research' },
-				{ id: 'class_7', name: 'Research Methodology' },
-			];
+      // Mock list of classes (in a real app, this would be fetched from the backend)
+      const classes = [
+        { id: 'class_1', name: 'Maths for Science' },
+        { id: 'class_2', name: 'Distributed Systems' },
+        { id: 'class_3', name: 'Accounting' },
+        { id: 'class_4', name: 'Procurement' },
+        { id: 'class_5', name: 'Introduction to Programming' },
+        { id: 'class_6', name: 'Operations Research' },
+        { id: 'class_7', name: 'Research Methodology' },
+      ];
 
-			// Array to store marked attendances
-			let markedAttendances = [];
+      // Array to store marked attendances
+      let markedAttendances = [];
 
-			const admission_number = localStorage.getItem('admission_number');
-			const encodedAdmissionNumber = encodeURIComponent(admission_number);
-			const notMarked = document.getElementById('noAttendnace');
+      const admission_number = localStorage.getItem('admission_number');
+      const encodedAdmissionNumber = encodeURIComponent(admission_number);
+      const notMarked = document.getElementById('noAttendnace');
 
-			// Define the markAttendance function globally
-			async function markAttendance(event) {
-				if (event) event.preventDefault(); // Prevent form submission
+      // Define the markAttendance function globally
+      async function markAttendance(event) {
+        if (event) event.preventDefault(); // Prevent form submission
 
-				const classSelect = document.getElementById('classSelect');
-				const dateSelect = document.getElementById('dateSelect');
-				const statusSelect = document.getElementById('statusSelect');
-				const markButton = document.getElementById('markButton');
-				const messageDiv = document.getElementById('message');
+        const classSelect = document.getElementById('classSelect');
+        const dateSelect = document.getElementById('dateSelect');
+        const statusSelect = document.getElementById('statusSelect');
+        const markButton = document.getElementById('markButton');
+        const messageDiv = document.getElementById('message');
 
-				const classId = classSelect.value;
-				const date = dateSelect.value;
-				const status = statusSelect.value;
+        const classId = classSelect.value;
+        const date = dateSelect.value;
+        const status = statusSelect.value;
 
-				// Validation
-				if (!classId) {
-					showMessage(
-						'Please select a class.',
-						'bg-red-100 text-red-700'
-					);
-					return;
-				}
-				if (!date) {
-					showMessage(
-						'Please select a date.',
-						'bg-red-100 text-red-700'
-					);
-					return;
-				}
+        // Validation
+        if (!classId) {
+          showMessage('Please select a class.', 'bg-red-100 text-red-700');
+          return;
+        }
+        if (!date) {
+          showMessage('Please select a date.', 'bg-red-100 text-red-700');
+          return;
+        }
 
-				// Check if attendance for this class on this date has already been marked
-				const alreadyMarked = markedAttendances.some(
-					(attendance) =>
-						attendance.classId === classId &&
-						attendance.date === date
-				);
-				if (alreadyMarked) {
-					showMessage(
-						'You have already marked attendance for this class on this date.',
-						'bg-red-100 text-red-700'
-					);
-					return;
-				}
+        // Check if attendance for this class on this date has already been marked
+        const alreadyMarked = markedAttendances.some(
+          (attendance) =>
+            attendance.classId === classId && attendance.date === date
+        );
+        if (alreadyMarked) {
+          showMessage(
+            'You have already marked attendance for this class on this date.',
+            'bg-red-100 text-red-700'
+          );
+          return;
+        }
 
-				// Disable button and show loading state
-				markButton.disabled = true;
-				markButton.innerHTML =
-					'<span class="spinner"></span> Marking...';
+        // Disable button and show loading state
+        markButton.disabled = true;
+        markButton.innerHTML = '<span class="spinner"></span> Marking...';
 
-				// Prepare data to send to the backend
-				const attendanceData = {
-					classId,
-					status,
-					date,
-				};
+        // Prepare data to send to the backend
+        const attendanceData = {
+          classId,
+          status,
+          date,
+        };
 
-				try {
-					const userRes = await fetch(
-						`http://localhost:3000/api/auth/user/check-admission/${encodedAdmissionNumber}`,
-						{
-							method: 'GET',
-							headers: {
-								'Content-Type': 'application/json',
-							},
-						}
-					);
-					const data = await userRes.json();
-					notMarked.classList.add('hidden');
+        try {
+          const userRes = await fetch(
+            `http://localhost:3000/api/auth/user/check-admission/${encodedAdmissionNumber}`,
+            {
+              method: 'GET',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+            }
+          );
+          const data = await userRes.json();
+          console.log(data);
+          notMarked.classList.add('hidden');
 
-					const response = await fetch(
-						'http://localhost:5000/api/attendance/mark-attendance',
-						{
-							method: 'POST',
-							headers: {
-								'Content-Type': 'application/json',
-								Authorization: 'Bearer your_token_here',
-							},
-							body: JSON.stringify({
-								...attendanceData,
-								studentId: data.id,
-							}),
-						}
-					);
+          const response = await fetch(
+            'http://localhost:3000/api/attendance/mark-attendance',
+            {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                Authorization: 'Bearer your_token_here',
+              },
+              body: JSON.stringify({
+                ...attendanceData,
+                studentId: data.id,
+              }),
+            }
+          );
 
-					if (!response.ok) {
-						throw new Error('Failed to mark attendance.');
-					}
+          if (!response.ok) {
+            throw new Error('Failed to mark attendance.');
+          }
 
-					showMessage(
-						'Attendance marked successfully!',
-						'bg-green-100 text-green-700'
-					);
+          showMessage(
+            'Attendance marked successfully!',
+            'bg-green-100 text-green-700'
+          );
 
-					// Add to marked attendances
-					markedAttendances.push({ classId, date, status });
-					updateAttendanceHistory();
+          // Add to marked attendances
+          markedAttendances.push({ classId, date, status });
+          updateAttendanceHistory();
 
-					// Reset the form for marking another subject
-					resetForm();
-				} catch (error) {
-					console.error('Error marking attendance:', error);
-					showMessage(
-						'Failed to mark attendance. Please try again.',
-						'bg-red-100 text-red-700'
-					);
-				} finally {
-					// Re-enable button and reset text
-					markButton.disabled = false;
-					markButton.innerHTML = `
+          // Reset the form for marking another subject
+          resetForm();
+        } catch (error) {
+          console.error('Error marking attendance:', error);
+          showMessage(
+            'Failed to mark attendance. Please try again.',
+            'bg-red-100 text-red-700'
+          );
+        } finally {
+          // Re-enable button and reset text
+          markButton.disabled = false;
+          markButton.innerHTML = `
           <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
           </svg>
           Mark Attendance
         `;
-				}
-			}
+        }
+      }
 
-			// Add event listener to the form
-			document.addEventListener('DOMContentLoaded', function () {
-				const form = document.getElementById('attendanceForm');
-				if (form) {
-					form.addEventListener('submit', markAttendance);
-				}
-			});
+      // Add event listener to the form
+      document.addEventListener('DOMContentLoaded', function () {
+        const form = document.getElementById('attendanceForm');
+        if (form) {
+          form.addEventListener('submit', markAttendance);
+        }
+      });
 
-			// Function to update the attendance history display
-			function updateAttendanceHistory() {
-				const attendanceHistory =
-					document.getElementById('attendanceHistory');
-				const attendanceList =
-					document.getElementById('attendanceList');
+      // Function to update the attendance history display
+      function updateAttendanceHistory() {
+        const attendanceHistory = document.getElementById('attendanceHistory');
+        const attendanceList = document.getElementById('attendanceList');
 
-				// Show the history section
-				attendanceHistory.classList.remove('hidden');
+        // Show the history section
+        attendanceHistory.classList.remove('hidden');
 
-				// Clear the current list
-				attendanceList.innerHTML = '';
+        // Clear the current list
+        attendanceList.innerHTML = '';
 
-				// Add each marked attendance to the list
-				markedAttendances.forEach((attendance) => {
-					const className =
-						classes.find((cls) => cls.id === attendance.classId)
-							?.name || 'Unknown Class';
-					const statusText =
-						attendance.status.charAt(0).toUpperCase() +
-						attendance.status.slice(1);
-					const li = document.createElement('li');
-					li.textContent = `Attendance for ${className} on ${attendance.date}: ${statusText}`;
-					attendanceList.appendChild(li);
-				});
+        // Add each marked attendance to the list
+        markedAttendances.forEach((attendance) => {
+          const className =
+            classes.find((cls) => cls.id === attendance.classId)?.name ||
+            'Unknown Class';
+          const statusText =
+            attendance.status.charAt(0).toUpperCase() +
+            attendance.status.slice(1);
+          const li = document.createElement('li');
+          li.textContent = `Attendance for ${className} on ${attendance.date}: ${statusText}`;
+          attendanceList.appendChild(li);
+        });
 
-				// Add a fade-in animation
-				attendanceHistory.classList.add('fade-in');
-			}
+        // Add a fade-in animation
+        attendanceHistory.classList.add('fade-in');
+      }
 
-			// Function to reset the form for marking another subject
-			function resetForm() {
-				const classSelect = document.getElementById('classSelect');
-				const statusSelect = document.getElementById('statusSelect');
+      // Function to reset the form for marking another subject
+      function resetForm() {
+        const classSelect = document.getElementById('classSelect');
+        const statusSelect = document.getElementById('statusSelect');
 
-				classSelect.value = ''; // Reset class selection
-				statusSelect.value = 'present'; // Reset status to default
-				// Keep the date as is, assuming the user is marking for the same day
-			}
+        classSelect.value = ''; // Reset class selection
+        statusSelect.value = 'present'; // Reset status to default
+        // Keep the date as is, assuming the user is marking for the same day
+      }
 
-			// Function to show success/error messages
-			function showMessage(message, classes) {
-				const messageDiv = document.getElementById('message');
-				messageDiv.textContent = message;
-				messageDiv.className = `mt-4 p-3 rounded-lg text-center ${classes}`;
-				messageDiv.classList.remove('hidden');
+      // Function to show success/error messages
+      function showMessage(message, classes) {
+        const messageDiv = document.getElementById('message');
+        messageDiv.textContent = message;
+        messageDiv.className = `mt-4 p-3 rounded-lg text-center ${classes}`;
+        messageDiv.classList.remove('hidden');
 
-				// Hide the message after 3 seconds
-				setTimeout(() => {
-					messageDiv.classList.add('hidden');
-				}, 3000);
-			}
-		</script>
-	</body>
+        // Hide the message after 3 seconds
+        setTimeout(() => {
+          messageDiv.classList.add('hidden');
+        }, 3000);
+      }
+    </script>
+  </body>
 </html>
