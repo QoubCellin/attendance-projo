@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Attendance Reports</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body class="bg-gray-100 p-8">
+    <div class="max-w-6xl mx-auto bg-white p-6 rounded shadow">
+      <h1 class="text-2xl font-bold mb-6">Attendance Reports</h1>
+      <table class="min-w-full border border-gray-300">
+        <thead>
+          <tr class="bg-gray-200">
+            <th class="py-2 px-4 border">Class</th>
+            <th class="py-2 px-4 border">Date</th>
+            <th class="py-2 px-4 border">Admission Number</th>
+            <th class="py-2 px-4 border">Email</th>
+            <th class="py-2 px-4 border">Status</th>
+          </tr>
+        </thead>
+        <tbody id="reportTableBody"></tbody>
+      </table>
+      <div id="summary" class="mt-6"></div>
+    </div>
+    <script>
+      // Map classId to class name
+      const classMap = {
+        class_1: 'Maths for Science',
+        class_2: 'Distributed Systems',
+        class_3: 'Accounting',
+        class_4: 'Procurement',
+        class_5: 'Introduction to Programming',
+        class_6: 'Operations Research',
+        class_7: 'Research Methodology',
+      };
+
+      async function fetchReports() {
+        const res = await fetch('http://localhost:3000/api/attendance/all', {
+          headers: {
+            'Content-Type': 'application/json',
+            // 'Authorization': 'Bearer ' + localStorage.getItem('accessToken')
+          },
+        });
+        const data = await res.json();
+        return data.attendance || [];
+      }
+
+      function renderTable(attendanceArray) {
+        const tbody = document.getElementById('reportTableBody');
+        tbody.innerHTML = '';
+        let summary = {};
+
+        attendanceArray.forEach((record) => {
+          const classId = record.classId;
+          const className = classMap[classId] || classId;
+          const date = new Date(record.date).toLocaleDateString();
+
+          record.records.forEach((studentRecord) => {
+            const student = studentRecord.studentId;
+            const admissionNumber = student?.admission_number || 'N/A';
+            const email = student?.email || 'N/A';
+            const status = studentRecord.status;
+
+            // For summary
+            summary[className] = summary[className] || {
+              present: 0,
+              excused: 0,
+              late: 0,
+              total: 0,
+            };
+            summary[className][status] = (summary[className][status] || 0) + 1;
+            summary[className].total++;
+
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+              <td class="py-2 px-4 border">${className}</td>
+              <td class="py-2 px-4 border">${date}</td>
+              <td class="py-2 px-4 border">${admissionNumber}</td>
+              <td class="py-2 px-4 border">${email}</td>
+              <td class="py-2 px-4 border">${
+                status.charAt(0).toUpperCase() + status.slice(1)
+              }</td>
+            `;
+            tbody.appendChild(tr);
+          });
+        });
+
+        // Render summary
+        renderSummary(summary);
+      }
+
+      function renderSummary(summary) {
+        const summaryDiv = document.getElementById('summary');
+        let html = '<h2 class="text-lg font-semibold mb-2">Summary</h2>';
+        html +=
+          '<table class="min-w-full border border-gray-300 mb-4"><thead><tr class="bg-gray-100"><th class="py-1 px-2 border">Class</th><th class="py-1 px-2 border">Present</th><th class="py-1 px-2 border">Excused</th><th class="py-1 px-2 border">Late</th><th class="py-1 px-2 border">Total</th></tr></thead><tbody>';
+        for (const className in summary) {
+          const s = summary[className];
+          html += `<tr>
+            <td class="py-1 px-2 border">${className}</td>
+            <td class="py-1 px-2 border">${s.present || 0}</td>
+            <td class="py-1 px-2 border">${s.excused || 0}</td>
+            <td class="py-1 px-2 border">${s.late || 0}</td>
+            <td class="py-1 px-2 border">${s.total}</td>
+          </tr>`;
+        }
+        html += '</tbody></table>';
+        summaryDiv.innerHTML = html;
+      }
+
+      document.addEventListener('DOMContentLoaded', async () => {
+        const attendance = await fetchReports();
+        renderTable(attendance);
+      });
+    </script>
+  </body>
+</html>
